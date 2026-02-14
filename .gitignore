@@ -1,0 +1,86 @@
+gitignore
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# APPWRITE Data file
+/app/src/main/java/com/vibedev/bluecollar/data/AppData.kt
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc) - Do not check in sensitive information.
+local.properties
+
+# Proguard folder
+proguard/
+
+# Log Files
+*.log
+
+# Android Studio specific files
+.navigation/
+captures/
+*.iml
+.idea/
+.cxx/
+.externalNativeBuild/
+
+# Keystore files - Do not check in your signing keys.
+*.jks
+*.keystore
+
+# Google Services (e.g. APIs or Firebase) - If it does not contain sensitive information, you might want to commit this.
+google-services.json
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# lint
+lint/
+
+# Android Profiling
+*.hprof
+
+# Backup files
+*.bak
+*.bak2
+*~
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Claude Code settings
+.claude/settings.local.json
+
+# Exclude test and androidTest packages from commits
+/app/src/androidTest/
+/app/src/test/

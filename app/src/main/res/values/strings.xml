@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Blue Collar</string>
+    <string-array name="service_types">
+        <item>Cleaning</item>
+        <item>Painting</item>
+        <item>Plumbing</item>
+        <item>Repairing</item>
+        <item>Electrical</item>
+    </string-array>
+    <string name="address">Address</string>
+    <string name="cost">Cost</string>
+    <string name="accept">Accept</string>
+</resources>

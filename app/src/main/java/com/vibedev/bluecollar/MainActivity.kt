@@ -140,15 +140,13 @@ fun BlueCollarMainScreen() {
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach { 
-                if (userProfile?.isServiceProvider == true) {
-                    item(
-                        icon = { Icon(it.icon, contentDescription = it.label) },
-                        label = { Text(it.label) },
-                        selected = it == currentDestination,
-                        onClick = { currentDestination = it }
-                    )
-                }
+            AppDestinations.entries.forEach {
+                item(
+                    icon = { Icon(it.icon, contentDescription = it.label) },
+                    label = { Text(it.label) },
+                    selected = it == currentDestination,
+                    onClick = { currentDestination = it }
+                )
             }
         }
     ) {

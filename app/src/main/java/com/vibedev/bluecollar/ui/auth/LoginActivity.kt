@@ -1,19 +1,21 @@
 package com.vibedev.bluecollar.ui.auth
 
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.activity.viewModels
+import kotlinx.coroutines.launch
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 
 import com.vibedev.bluecollar.MainActivity
-import com.vibedev.bluecollar.databinding.ActivityLoginBinding
-import com.vibedev.bluecollar.manager.SessionManager
+import com.vibedev.bluecollar.utils.logError
 import com.vibedev.bluecollar.utils.showToast
+import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
-import kotlinx.coroutines.launch
+import com.vibedev.bluecollar.databinding.ActivityLoginBinding
+
 
 class LoginActivity : AppCompatActivity() {
 
@@ -21,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val authViewModel: AuthViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
+    private var TAG = "LoginActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +55,13 @@ class LoginActivity : AppCompatActivity() {
         binding.btnLoginGoogle.setOnClickListener {
             showLoading(true)
             lifecycleScope.launch {
-                authViewModel.googleLogin(this@LoginActivity)
+                try {
+                    authViewModel.googleLogin(this@LoginActivity)
+                } catch (e: IllegalStateException) {
+                    showLoading(false)
+                    logError(TAG, "User cancelled Google login", e)
+                    showToast(this@LoginActivity, "Login cancelled")
+                }
             }
         }
 

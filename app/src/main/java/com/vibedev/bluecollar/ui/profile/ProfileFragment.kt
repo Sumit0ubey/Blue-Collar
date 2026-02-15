@@ -28,14 +28,14 @@ class ProfileFragment : Fragment() {
     private var _binding: ActivityProfileBinding? = null
     private val accountViewModel: AuthViewModel by viewModels()
     private lateinit var sessionManager: SessionManager
-    private val binding get() = _binding!!
+    private val binding get() = _binding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = ActivityProfileBinding.inflate(inflater, container, false)
-        return binding.root
+        return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,19 +43,24 @@ class ProfileFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
 
-        binding.btnEditProfile.setOnClickListener {
+        binding?.btnEditProfile?.setOnClickListener {
             startActivity(Intent(requireContext(), EditProfileActivity::class.java))
         }
 
-        binding.btnLogout.setOnClickListener {
-            lifecycleScope.launch {
-                accountViewModel.logout()
-                sessionManager.deleteAuthToken()
+        binding?.btnLogout?.setOnClickListener {
+            binding?.progressBar?.visibility = View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    accountViewModel.logout()
+                    sessionManager.deleteAuthToken()
 
-                val intent = Intent(requireContext(), LoginActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    val intent = Intent(requireContext(), LoginActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    }
+                    startActivity(intent)
+                } finally {
+                    binding?.progressBar?.visibility = View.GONE
                 }
-                startActivity(intent)
             }
         }
     }
@@ -70,35 +75,36 @@ class ProfileFragment : Fragment() {
     }
 
     private fun bindProfileData(profile: UserProfile?) {
+        binding?.let { binding ->
+            GlideService.loadCircularImage(
+                requireContext(),
+                profile?.profileImage,
+                R.drawable.progress_animation,
+                R.drawable.account_icon,
+                binding.ivProfileImage
+            )
 
-        GlideService.loadCircularImage(
-            requireContext(),
-            profile?.profileImage,
-            R.drawable.progress_animation,
-            R.drawable.account_icon,
-            binding.ivProfileImage
-        )
+            binding.userName.text = profile?.name?.capitalizeFirst()
+            binding.location.text = profile?.city?.capitalizeFirst() ?: ""
 
-        binding.userName.text = profile?.name?.capitalizeFirst()
-        binding.location.text = profile?.city?.capitalizeFirst() ?: ""
-        
-        val isServiceProvider = profile?.isServiceProvider ?: false
+            val isServiceProvider = profile?.isServiceProvider ?: false
 
-        if (isServiceProvider) {
-            binding.userSpecialty.visibility = View.VISIBLE
-            binding.aboutHeader.visibility = View.VISIBLE
-            binding.aboutContent.visibility = View.VISIBLE
-            binding.portfolioHeader.visibility = View.VISIBLE
-            binding.recyclerViewPortfolio.visibility = View.VISIBLE
+            if (isServiceProvider) {
+                binding.userSpecialty.visibility = View.VISIBLE
+                binding.aboutHeader.visibility = View.VISIBLE
+                binding.aboutContent.visibility = View.VISIBLE
+                binding.portfolioHeader.visibility = View.VISIBLE
+                binding.recyclerViewPortfolio.visibility = View.VISIBLE
 
-            binding.userSpecialty.text = profile.serviceType?.capitalizeFirst() ?: "Service Provider"
-            binding.rating.text = profile.rating ?: "3.5"
-            binding.aboutContent.text = profile.about?.capitalizeFirst() ?: "Professional ${profile.serviceType}".capitalizeFirst()
+                binding.userSpecialty.text = profile.serviceType?.capitalizeFirst() ?: "Service Provider"
+                binding.rating.text = profile.rating ?: "3.5"
+                binding.aboutContent.text = profile.about?.capitalizeFirst() ?: "Professional ${profile.serviceType}".capitalizeFirst()
 
-            setupPortfolioRecycleView()
-        } else {
-            binding.ratingIcon.setImageResource(R.drawable.phone_icon)
-            binding.rating.text = "${profile?.phone}"
+                setupPortfolioRecycleView()
+            } else {
+                binding.ratingIcon.setImageResource(R.drawable.phone_icon)
+                binding.rating.text = "${profile?.phone}"
+            }
         }
     }
 
@@ -106,7 +112,7 @@ class ProfileFragment : Fragment() {
         val portfolioImageUrls = AppData.userProfile?.portfolio ?: emptyList()
 
         val portfolioAdapter = PortfolioAdapter(portfolioImageUrls)
-        binding.recyclerViewPortfolio.apply {
+        binding?.recyclerViewPortfolio?.apply {
             layoutManager = GridLayoutManager(context, 3)
             adapter = portfolioAdapter
         }

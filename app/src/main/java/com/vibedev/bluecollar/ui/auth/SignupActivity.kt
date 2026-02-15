@@ -1,19 +1,21 @@
 package com.vibedev.bluecollar.ui.auth
 
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.activity.viewModels
+import kotlinx.coroutines.launch
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.vibedev.bluecollar.MainActivity
 
-import com.vibedev.bluecollar.databinding.ActivitySignupBinding
-import com.vibedev.bluecollar.manager.SessionManager
+import com.vibedev.bluecollar.MainActivity
+import com.vibedev.bluecollar.utils.logError
 import com.vibedev.bluecollar.utils.showToast
+import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
-import kotlinx.coroutines.launch
+import com.vibedev.bluecollar.databinding.ActivitySignupBinding
+
 
 class SignupActivity : AppCompatActivity() {
 
@@ -24,6 +26,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var fullName: String
     private lateinit var email: String
     private lateinit var password: String
+    private var TAG = "SignupActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +44,13 @@ class SignupActivity : AppCompatActivity() {
         binding.btnContinueGoogle.setOnClickListener {
             showLoading(true)
             lifecycleScope.launch {
-                authViewModel.googleLogin(this@SignupActivity)
+                try {
+                    authViewModel.googleLogin(this@SignupActivity)
+                } catch (e: IllegalStateException) {
+                    showLoading(false)
+                    logError(TAG, "User cancelled Google Signup", e)
+                    showToast(this@SignupActivity, "Signup cancelled")
+                }
             }
         }
 

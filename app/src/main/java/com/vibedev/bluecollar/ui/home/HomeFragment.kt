@@ -68,7 +68,6 @@ class HomeFragment : Fragment() {
         }
 
         setupRequestHistoryRecyclerView()
-          
     }
 
     private fun showNewRequestDialog() {
@@ -95,13 +94,14 @@ class HomeFragment : Fragment() {
                 val name = dialogBinding.formName.text.toString().trim().lowercase()
                 val serviceType = dialogBinding.formServiceType.text.toString().trim().lowercase()
                 val serviceDescription = dialogBinding.formDescription.text.toString().trim().lowercase()
+                val pay = dialogBinding.pay.text.toString().trim().lowercase()
                 val city = dialogBinding.formCity.text.toString().trim().lowercase()
                 val address = dialogBinding.formAddress.text.toString().trim().lowercase()
                 val phone = dialogBinding.formPhone.text.toString().trim().lowercase()
 
-                val allFields = listOf(name, serviceType, serviceDescription, city, address, phone)
+                val allFields = listOf(name, serviceType, serviceDescription, pay, city, address, phone)
                 if (allFields.all { it.isNotEmpty() }) {
-                    postNewRequest(name, serviceType, serviceDescription, city, address, phone)
+                    postNewRequest(name, serviceType, serviceDescription, pay, city, address, phone)
                     dialog.dismiss()
                 } else {
                     showToast(requireContext(), "Please fill all fields")
@@ -136,7 +136,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun postNewRequest(name: String, serviceType: String, serviceDescription: String, city: String, address: String, phone: String) {
+    private fun postNewRequest(name: String, serviceType: String, serviceDescription: String, pay: String, city: String, address: String, phone: String) {
         val loadingDialog = createLoadingDialog()
         loadingDialog.show()
         val loadingText = loadingDialog.findViewById<TextView>(R.id.loading_text)
@@ -145,7 +145,7 @@ class HomeFragment : Fragment() {
             loadingText?.text = "Submitting your request..."
             try {
                 val userId = AppData.authToken ?: throw IllegalStateException("User not authenticated")
-                requestViewModel.createRequest(userId, name, city, address, serviceDescription, serviceType)
+                requestViewModel.createRequest(userId, name, city, address, serviceDescription, serviceType, pay)
                 showToast(requireContext(), "Request Submitted!")
             } catch (e: Exception) {
                 showToast(requireContext(), "Error: ${e.message}")

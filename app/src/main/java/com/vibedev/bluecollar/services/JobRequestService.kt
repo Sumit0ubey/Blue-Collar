@@ -1,22 +1,22 @@
 package com.vibedev.bluecollar.services
 
-import io.appwrite.Client
-import io.appwrite.ID
 import io.appwrite.services.Databases
 import io.appwrite.Permission
-import io.appwrite.Role
-import com.vibedev.bluecollar.data.AppData
-import com.vibedev.bluecollar.data.JobRequest
-import com.vibedev.bluecollar.utils.logError
+import io.appwrite.Client
 import io.appwrite.Query
+import io.appwrite.Role
+import io.appwrite.ID
 
+import com.vibedev.bluecollar.data.AppData
+import com.vibedev.bluecollar.utils.logError
+import com.vibedev.bluecollar.data.JobRequest
 
 class JobRequestService(client: Client) {
 
     private val databases = Databases(client)
     private val TAG = "JobRequestService"
 
-    suspend fun createRequest(customerId: String, customerName: String, city: String, address: String, serviceDescription: String, serviceType: String) {
+    suspend fun createRequest(customerId: String, customerName: String, city: String, address: String, serviceDescription: String, serviceType: String, pay: String) {
         try {
             val perms = listOf(
                 Permission.read(Role.user(customerId)),
@@ -35,6 +35,7 @@ class JobRequestService(client: Client) {
                     "address" to address,
                     "description" to serviceDescription,
                     "serviceType" to serviceType,
+                    "cost" to pay,
                     "status" to "open"
                 ),
                 permissions = perms

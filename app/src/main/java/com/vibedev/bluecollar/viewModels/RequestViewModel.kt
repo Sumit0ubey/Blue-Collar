@@ -6,8 +6,8 @@ import com.vibedev.bluecollar.manager.AppwriteManager
 
 class RequestViewModel : ViewModel() {
 
-    suspend fun createRequest(customerId: String, customerName: String, city: String, address: String, serviceDescription: String, serviceType: String) {
-        return AppwriteManager.request.createRequest(customerId, customerName, city, address, serviceDescription, serviceType)
+    suspend fun createRequest(customerId: String, customerName: String, city: String, address: String, serviceDescription: String, serviceType: String, pay: String) {
+        return AppwriteManager.request.createRequest(customerId, customerName, city, address, serviceDescription, serviceType, pay)
     }
 
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {

@@ -6,6 +6,7 @@ object AppDataExample {
     const val APPWRITE_ENDPOINT = "https://region.cloud.appwrite.io/v1" // something like this but instead of this use your endpoint
     const val APPWRITE_PROJECT_ID = "your_project_id"  // example 546ef4545def8
     const val DATABASE_ID = "your_database_id"
+    const val TEAM_ID = "your_team_id"
     const val PROFILE_COLLECTION_ID = "your_profile_collection_id"
     const val JOB_REQUEST_COLLECTION_ID = "your_job_request_collection_id"
     const val JOB_HISTORY_COLLECTION_ID = "your_job_history_collection_id"

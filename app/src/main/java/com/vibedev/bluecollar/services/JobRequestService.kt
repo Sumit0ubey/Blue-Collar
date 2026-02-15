@@ -21,7 +21,7 @@ class JobRequestService(client: Client) {
             val perms = listOf(
                 Permission.read(Role.user(customerId)),
                 Permission.update(Role.user(customerId)),
-                Permission.read(Role.team(AppData.MAKE_PROVIDER_FUNCTION_ID))
+                Permission.read(Role.team(AppData.TEAM_ID))
             )
 
             databases.createDocument(

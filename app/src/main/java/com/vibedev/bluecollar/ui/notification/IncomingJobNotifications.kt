@@ -108,6 +108,6 @@ object IncomingJobNotifications {
 
         Handler(Looper.getMainLooper()).postDelayed({
             NotificationManagerCompat.from(context).cancel(jobId.hashCode())
-        }, 10_000)
+        }, 20_000)
     }
 }

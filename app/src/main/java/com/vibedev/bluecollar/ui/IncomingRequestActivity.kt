@@ -55,13 +55,13 @@ class IncomingRequestActivity : AppCompatActivity() {
         val startColor = Color.GREEN
         val endColor = Color.RED
 
-        timer = object : CountDownTimer(10000, 50) {
+        timer = object : CountDownTimer(20000, 50) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = millisUntilFinished / 1000
                 binding.tvTimer.text = secondsRemaining.toString()
                 binding.circularProgressBar.progress = millisUntilFinished.toInt()
 
-                val fraction = millisUntilFinished.toFloat() / 10000
+                val fraction = millisUntilFinished.toFloat() / 20000
                 val color = ArgbEvaluator().evaluate(1 - fraction, startColor, endColor) as Int
                 val drawable = DrawableCompat.wrap(binding.circularProgressBar.progressDrawable)
                 DrawableCompat.setTint(drawable, color)

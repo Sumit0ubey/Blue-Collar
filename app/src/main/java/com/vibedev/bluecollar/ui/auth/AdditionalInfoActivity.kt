@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.vibedev.bluecollar.MainActivity
 import com.vibedev.bluecollar.R
+import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.databinding.ActivityAdditionalInfoBinding
 import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.services.CloudinaryService
@@ -42,7 +43,7 @@ class AdditionalInfoActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
-        val serviceTypes = resources.getStringArray(R.array.service_types)
+        val serviceTypes = AppData.serviceTypes
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, serviceTypes)
         binding.actvServiceType.setAdapter(adapter)
 

@@ -12,14 +12,14 @@ import android.os.Bundle
 import android.view.View
 
 import com.vibedev.bluecollar.R
-import com.vibedev.bluecollar.data.UserProfile
-import com.vibedev.bluecollar.utils.capitalizeFirst
-import com.vibedev.bluecollar.ui.auth.LoginActivity
-import com.vibedev.bluecollar.manager.SessionManager
-import com.vibedev.bluecollar.adapter.PortfolioAdapter
 import com.vibedev.bluecollar.data.AppData
+import com.vibedev.bluecollar.data.UserProfile
+import com.vibedev.bluecollar.ui.auth.LoginActivity
+import com.vibedev.bluecollar.utils.capitalizeFirst
 import com.vibedev.bluecollar.services.GlideService
+import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.viewModels.AuthViewModel
+import com.vibedev.bluecollar.adapter.PortfolioAdapter
 import com.vibedev.bluecollar.databinding.ActivityProfileBinding
 
 

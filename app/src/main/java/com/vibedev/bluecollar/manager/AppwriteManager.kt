@@ -7,6 +7,7 @@ import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.services.ProfileService
 import com.vibedev.bluecollar.services.AccountService
 import com.vibedev.bluecollar.services.ServicesService
+import com.vibedev.bluecollar.services.RealtimeService
 import com.vibedev.bluecollar.services.FunctionsService
 import com.vibedev.bluecollar.services.JobHistoryService
 import com.vibedev.bluecollar.services.JobRequestService
@@ -24,6 +25,7 @@ object AppwriteManager {
     internal lateinit var requestHistory: JobHistoryService
     internal lateinit var notification: NotificationService
     internal lateinit var functions: FunctionsService
+    internal lateinit var realtime: RealtimeService
 
 
     fun init(context: Context) {
@@ -38,6 +40,7 @@ object AppwriteManager {
         requestHistory = JobHistoryService(client)
         notification = NotificationService(client)
         functions = FunctionsService(client)
+        realtime = RealtimeService(client)
     }
 
 }

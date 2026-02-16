@@ -13,6 +13,8 @@ class SessionManager(context: Context) {
         private const val KEY_IS_LOGGED_IN = "isLoggedIn"
         private const val KEY_AUTH_TOKEN = "authToken"
         private const val IS_PROFILE_COMPLETED = "isProfileCompleted"
+        private const val KEY_CITIES = "cities"
+        private const val KEY_SERVICES = "services"
     }
 
 
@@ -24,6 +26,7 @@ class SessionManager(context: Context) {
 
     fun setProfileCompleted(completed: Boolean) {
         editor.putBoolean(IS_PROFILE_COMPLETED, completed)
+        editor.apply()
     }
 
     fun isProfileCompleted(): Boolean {
@@ -45,4 +48,22 @@ class SessionManager(context: Context) {
     val isLoggedIn: Boolean
         get() = prefs.getBoolean(KEY_IS_LOGGED_IN, false)
 
+
+    fun saveCities(cities: List<String>) {
+        editor.putStringSet(KEY_CITIES, cities.toSet())
+        editor.apply()
+    }
+
+    fun saveServices(services: List<String>) {
+        editor.putStringSet(KEY_SERVICES, services.toSet())
+        editor.apply()
+    }
+
+    fun getCities(): List<String> {
+        return prefs.getStringSet(KEY_CITIES, emptySet())?.toList() ?: emptyList()
+    }
+
+    fun getServices(): List<String> {
+        return prefs.getStringSet(KEY_SERVICES, emptySet())?.toList() ?: emptyList()
+    }
 }

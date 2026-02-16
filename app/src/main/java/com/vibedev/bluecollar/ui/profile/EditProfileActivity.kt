@@ -15,8 +15,8 @@ import android.os.Bundle
 import android.view.View
 import android.net.Uri
 
-import com.vibedev.bluecollar.R
 import com.vibedev.bluecollar.data.AppData
+import com.vibedev.bluecollar.utils.showToast
 import com.vibedev.bluecollar.services.GlideService
 import com.vibedev.bluecollar.utils.capitalizeFirst
 import com.vibedev.bluecollar.utils.capitalizeEachWord
@@ -24,7 +24,6 @@ import com.vibedev.bluecollar.services.CloudinaryService
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
 import com.vibedev.bluecollar.adapter.PortfolioUploadAdapter
 import com.vibedev.bluecollar.databinding.ActivityEditProfileBinding
-import com.vibedev.bluecollar.utils.showToast
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -115,7 +114,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun setupServiceTypeDropdown() {
-        val serviceTypes = resources.getStringArray(R.array.service_types)
+        val serviceTypes = AppData.serviceTypes
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, serviceTypes)
         binding.actvServiceType.setAdapter(adapter)
     }

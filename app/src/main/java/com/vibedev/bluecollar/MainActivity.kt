@@ -1,12 +1,18 @@
 package com.vibedev.bluecollar
 
+import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
@@ -33,11 +40,12 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.manager.SessionManager
+import com.vibedev.bluecollar.services.ProviderOnlineService
 import com.vibedev.bluecollar.ui.JobActivity
-import com.vibedev.bluecollar.ui.NotificationsActivity
 import com.vibedev.bluecollar.ui.auth.AdditionalInfoActivity
 import com.vibedev.bluecollar.ui.auth.LoginActivity
 import com.vibedev.bluecollar.ui.home.HomeFragment
+import com.vibedev.bluecollar.ui.notification.NotificationsActivity
 import com.vibedev.bluecollar.ui.profile.ProfileFragment
 import com.vibedev.bluecollar.ui.service.ServiceFragment
 import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
@@ -53,6 +61,7 @@ class MainActivity : FragmentActivity() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private var isContentLoaded = false
     private var noInternetDialog: AlertDialog? = null
+    private var onPermissionGranted: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,7 +148,6 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun showNoInternetDialog() {
-        // Dismiss any existing dialog to prevent duplicates.
         noInternetDialog?.dismiss()
 
         noInternetDialog = MaterialAlertDialogBuilder(this)
@@ -153,6 +161,34 @@ class MainActivity : FragmentActivity() {
             }
             .setCancelable(false)
             .show()
+    }
+
+    fun ensureNotificationPermissionThen(action: () -> Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                onPermissionGranted = action
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+                return
+            }
+        }
+        action()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted?.invoke()
+            onPermissionGranted = null
+        }
     }
 }
 
@@ -173,10 +209,39 @@ fun LoadingScreen() {
 @PreviewScreenSizes
 @Composable
 fun BlueCollarMainScreen() {
-    val context = LocalActivity.current as FragmentActivity
+    val context = LocalActivity.current as MainActivity
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var isOnline by rememberSaveable { mutableStateOf(false) }
+    var isConnecting by remember { mutableStateOf(false) }
     val userProfile = AppData.userProfile
+
+    val broadcastReceiver = remember { object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_SUCCESS -> {
+                    isConnecting = false
+                    isOnline = true
+                }
+                ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_ERROR -> {
+                    isConnecting = false
+                    isOnline = false
+                    Toast.makeText(context, "Failed to go online. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    } }
+
+    DisposableEffect(Unit) {
+        val filter = IntentFilter().apply {
+            addAction(ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_SUCCESS)
+            addAction(ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_ERROR)
+        }
+        ContextCompat.registerReceiver(context, broadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+
+        onDispose {
+            context.unregisterReceiver(broadcastReceiver)
+        }
+    }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -206,13 +271,37 @@ fun BlueCollarMainScreen() {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(text = if (isOnline) "Online" else "Offline")
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Switch(
-                                    checked = isOnline,
-                                    onCheckedChange = { isOnline = it },
-                                    colors = SwitchDefaults.colors(
-                                        checkedThumbColor = blue_500
+                                if (isConnecting) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                } else {
+                                    Switch(
+                                        checked = isOnline,
+                                        onCheckedChange = { checked ->
+                                            if (checked) {
+                                                isConnecting = true
+                                                context.ensureNotificationPermissionThen {
+//                                                    val sessionManager = SessionManager(context)
+//                                                    val providerCities = AppData.userProfile?.cities ?: emptyList()
+//                                                    val providerServices = AppData.userProfile?.services ?: emptyList()
+//                                                    sessionManager.saveCities(providerCities)
+//                                                    sessionManager.saveServices(providerServices)
+
+                                                    ContextCompat.startForegroundService(
+                                                        context,
+                                                        Intent(context, ProviderOnlineService::class.java)
+                                                    )
+                                                }
+                                            } else {
+                                                isOnline = false
+                                                isConnecting = false
+                                                context.stopService(Intent(context, ProviderOnlineService::class.java))
+                                            }
+                                        },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = blue_500
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     },

@@ -1,20 +1,22 @@
 package com.vibedev.bluecollar.ui.service
 
-import android.os.Bundle
-import androidx.activity.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.activity.viewModels
+import kotlinx.coroutines.launch
+import android.os.Bundle
+
 import com.vibedev.bluecollar.R
-import com.vibedev.bluecollar.adapter.IncludedFeaturesAdapter
-import com.vibedev.bluecollar.adapter.PortfolioAdapter
 import com.vibedev.bluecollar.data.DetailService
-import com.vibedev.bluecollar.databinding.ActivityServiceDetailBinding
 import com.vibedev.bluecollar.services.GlideService
 import com.vibedev.bluecollar.utils.capitalizeFirst
+import com.vibedev.bluecollar.adapter.PortfolioAdapter
 import com.vibedev.bluecollar.viewModels.ServiceViewModel
-import kotlinx.coroutines.launch
+import com.vibedev.bluecollar.adapter.IncludedFeaturesAdapter
+import com.vibedev.bluecollar.databinding.ActivityServiceDetailBinding
+
 
 class ServiceDetailActivity : AppCompatActivity() {
 

@@ -1,7 +1,7 @@
 package com.vibedev.bluecollar.viewModels
 
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
+import androidx.activity.ComponentActivity
 import com.vibedev.bluecollar.manager.AppwriteManager
 
 class AuthViewModel : ViewModel() {

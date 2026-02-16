@@ -1,8 +1,9 @@
 package com.vibedev.bluecollar.viewModels
 
 import androidx.lifecycle.ViewModel
-import com.vibedev.bluecollar.data.DetailService
+
 import com.vibedev.bluecollar.data.Service
+import com.vibedev.bluecollar.data.DetailService
 import com.vibedev.bluecollar.manager.AppwriteManager
 
 class ServiceViewModel : ViewModel() {

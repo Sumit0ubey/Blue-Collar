@@ -10,4 +10,10 @@
     <string name="address">Address</string>
     <string name="cost">Cost</string>
     <string name="accept">Accept</string>
+    <string name="service_label">Service: %s</string>
+    <string name="cost_label">Cost: $%s</string>
+    <string name="city_label">City: %s</string>
+    <string name="address_label">Address: %s</string>
+    <string name="number_label">Number: %s</string>
+    <string name="description_label">Description: %s</string>
 </resources>

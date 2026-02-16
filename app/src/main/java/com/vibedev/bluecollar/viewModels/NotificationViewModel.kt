@@ -1,13 +1,15 @@
 package com.vibedev.bluecollar.viewModels
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.vibedev.bluecollar.data.Notification
-import com.vibedev.bluecollar.manager.AppwriteManager
-import com.vibedev.bluecollar.utils.logError
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
 import kotlinx.coroutines.launch
+
+import com.vibedev.bluecollar.utils.logError
+import com.vibedev.bluecollar.manager.AppwriteManager
+
 
 class NotificationViewModel : ViewModel() {
 

@@ -1,16 +1,17 @@
-package com.vibedev.bluecollar.ui
+package com.vibedev.bluecollar.ui.notification
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.vibedev.bluecollar.adapter.NotificationAdapter
+
 import com.vibedev.bluecollar.databinding.ActivityNotificationsBinding
 import com.vibedev.bluecollar.viewModels.NotificationViewModel
+import com.vibedev.bluecollar.adapter.NotificationAdapter
 
 class NotificationsActivity : AppCompatActivity() {
 

@@ -77,4 +77,32 @@ class FunctionsService(client: Client) {
             false
         }
     }
+
+    suspend fun acceptJob(jobId: String): Boolean {
+        return try {
+            val body = JSONObject()
+                .put("jobId", jobId)
+                .toString()
+
+            val execution = functions.createExecution(
+                functionId = AppData.ACCEPT_JOB_FUNCTION_ID,
+                body = body,
+                async = true
+            )
+
+            val responseJson = JSONObject(execution.responseBody)
+            if (responseJson.optBoolean("ok")) {
+                logInfo(tag, "Accepted request via function Successfully")
+                true
+            } else {
+                logError(tag, "Failed to accept request via function. Response: ${execution.responseBody}")
+                false
+            }
+
+
+        } catch (e: Exception) {
+            logError(tag, "Error calling accept request function for job $jobId", e)
+            false
+        }
+    }
 }

@@ -26,7 +26,7 @@ class SignupActivity : AppCompatActivity() {
     private lateinit var fullName: String
     private lateinit var email: String
     private lateinit var password: String
-    private var TAG = "SignupActivity"
+    private var tag = "SignupActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +48,7 @@ class SignupActivity : AppCompatActivity() {
                     authViewModel.googleLogin(this@SignupActivity)
                 } catch (e: IllegalStateException) {
                     showLoading(false)
-                    logError(TAG, "User cancelled Google Signup", e)
+                    logError(tag, "User cancelled Google Signup", e)
                     showToast(this@SignupActivity, "Signup cancelled")
                 }
             }

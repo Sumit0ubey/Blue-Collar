@@ -181,6 +181,21 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun ensureNotificationPermissionThen(action: () -> Unit) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+            if (!granted) {
+                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
+                return
+            }
+        }
+        action()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

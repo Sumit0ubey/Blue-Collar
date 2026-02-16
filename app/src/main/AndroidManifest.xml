@@ -3,7 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.REAL_TIME_SCHEDULING"
         tools:ignore="ProtectedPermissions" />
 
@@ -43,12 +48,22 @@
             </intent-filter>
         </activity>
 
-
+        <service
+            android:name=".services.ProviderOnlineService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <activity
-            android:name=".ui.NotificationsActivity"
+            android:name=".ui.notification.NotificationsActivity"
             android:exported="false"
             android:label="Notifications"
             android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ui.IncomingRequestActivity"
+            android:exported="false"
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop" />
         <activity
             android:name=".ui.home.RequestHistoryActivity"
             android:exported="false"

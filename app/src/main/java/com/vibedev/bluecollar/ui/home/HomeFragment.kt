@@ -144,8 +144,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             loadingText?.text = "Submitting your request..."
             try {
-                val userId = AppData.authToken ?: throw IllegalStateException("User not authenticated")
-                requestViewModel.createRequest(userId, name, city, address, serviceDescription, serviceType, pay)
+                requestViewModel.createRequest(name, phone, city, address, serviceDescription, serviceType, pay)
                 showToast(requireContext(), "Request Submitted!")
             } catch (e: Exception) {
                 showToast(requireContext(), "Error: ${e.message}")

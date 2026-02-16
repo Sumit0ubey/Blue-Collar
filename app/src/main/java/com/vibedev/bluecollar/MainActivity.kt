@@ -1,78 +1,87 @@
 package com.vibedev.bluecollar
 
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.filled.Person
-import androidx.fragment.app.FragmentContainerView
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.layout.width
-import androidx.activity.compose.LocalActivity
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.painterResource
-import androidx.fragment.app.FragmentActivity
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.IconButton
-import androidx.activity.compose.setContent
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Switch
-import androidx.lifecycle.lifecycleScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.fragment.app.Fragment
-import androidx.compose.ui.Alignment
-import androidx.activity.viewModels
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
-
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.vibedev.bluecollar.data.AppData
-import com.vibedev.bluecollar.ui.JobActivity
-import com.vibedev.bluecollar.ui.theme.blue_500
-import com.vibedev.bluecollar.ui.home.HomeFragment
-import com.vibedev.bluecollar.ui.auth.LoginActivity
 import com.vibedev.bluecollar.manager.SessionManager
-import com.vibedev.bluecollar.viewModels.AuthViewModel
+import com.vibedev.bluecollar.ui.JobActivity
 import com.vibedev.bluecollar.ui.NotificationsActivity
-import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
+import com.vibedev.bluecollar.ui.auth.AdditionalInfoActivity
+import com.vibedev.bluecollar.ui.auth.LoginActivity
+import com.vibedev.bluecollar.ui.home.HomeFragment
 import com.vibedev.bluecollar.ui.profile.ProfileFragment
 import com.vibedev.bluecollar.ui.service.ServiceFragment
+import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
+import com.vibedev.bluecollar.ui.theme.blue_500
+import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
-import com.vibedev.bluecollar.ui.auth.AdditionalInfoActivity
+import kotlinx.coroutines.launch
 
 
 class MainActivity : FragmentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
+    private var isContentLoaded = false
+    private var noInternetDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent { }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        if (isContentLoaded) {
+            return
+        }
+        checkNetworkAndLoad()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        noInternetDialog?.dismiss()
+    }
+
+    private fun checkNetworkAndLoad() {
+        if (isNetworkAvailable()) {
+            loadContent()
+        } else {
+            showNoInternetDialog()
+        }
+    }
+
+    private fun loadContent() {
+        isContentLoaded = true
         var isLoading by mutableStateOf(true)
 
         lifecycleScope.launch {
@@ -113,6 +122,37 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork =
+            connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else -> false
+        }
+    }
+
+    private fun showNoInternetDialog() {
+        // Dismiss any existing dialog to prevent duplicates.
+        noInternetDialog?.dismiss()
+
+        noInternetDialog = MaterialAlertDialogBuilder(this)
+            .setTitle("No Internet Connection")
+            .setMessage("Please connect to the internet to continue.")
+            .setPositiveButton("Settings") { _, _ ->
+                startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS))
+            }
+            .setNegativeButton("Retry") { _, _ ->
+                checkNetworkAndLoad()
+            }
+            .setCancelable(false)
+            .show()
     }
 }
 

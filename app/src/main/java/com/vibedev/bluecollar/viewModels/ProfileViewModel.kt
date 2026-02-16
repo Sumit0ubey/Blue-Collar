@@ -26,7 +26,9 @@ class ProfileViewModel : ViewModel() {
             profileImage = image
         )
 
-        AppwriteManager.functions.callMakeProvider(userId)
+        if (isServiceProvider) {
+            AppwriteManager.functions.callMakeProvider(userId)
+        }
     }
 
     suspend fun updateProfile(userId: String, data: Map<String, Any?>) {

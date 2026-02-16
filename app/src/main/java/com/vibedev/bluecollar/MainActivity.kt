@@ -1,6 +1,7 @@
 package com.vibedev.bluecollar
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -52,27 +53,42 @@ import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
 import com.vibedev.bluecollar.ui.theme.blue_500
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 
 class MainActivity : FragmentActivity() {
 
     private val authViewModel: AuthViewModel by viewModels()
     private val profileViewModel: ProfileViewModel by viewModels()
+
     private var isContentLoaded = false
     private var noInternetDialog: AlertDialog? = null
     private var onPermissionGranted: (() -> Unit)? = null
 
+    private var isLoadingState by mutableStateOf(true)
+    private var showMainState by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { }
+
+        enableEdgeToEdge()
+
+        setContent {
+            BlueCollarTheme {
+                if (isLoadingState) {
+                    LoadingScreen()
+                } else if (showMainState) {
+                    BlueCollarMainScreen()
+                } else {
+                    LoadingScreen()
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (isContentLoaded) {
-            return
-        }
+        if (isContentLoaded) return
         checkNetworkAndLoad()
     }
 
@@ -91,7 +107,8 @@ class MainActivity : FragmentActivity() {
 
     private fun loadContent() {
         isContentLoaded = true
-        var isLoading by mutableStateOf(true)
+        isLoadingState = true
+        showMainState = false
 
         lifecycleScope.launch {
             val sessionManager = SessionManager(this@MainActivity)
@@ -113,22 +130,13 @@ class MainActivity : FragmentActivity() {
                 if (userProfile != null) {
                     AppData.userProfile = userProfile
                 }
-                isLoading = false
+
+                isLoadingState = false
+                showMainState = true
             } else {
                 sessionManager.setProfileCompleted(false)
                 startActivity(Intent(this@MainActivity, AdditionalInfoActivity::class.java))
                 finish()
-            }
-        }
-
-        enableEdgeToEdge()
-        setContent {
-            BlueCollarTheme {
-                if (isLoading) {
-                    LoadingScreen()
-                } else {
-                    BlueCollarMainScreen()
-                }
             }
         }
     }
@@ -185,7 +193,10 @@ class MainActivity : FragmentActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 1001 &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             onPermissionGranted?.invoke()
             onPermissionGranted = null
         }
@@ -209,39 +220,57 @@ fun LoadingScreen() {
 @PreviewScreenSizes
 @Composable
 fun BlueCollarMainScreen() {
+
     val context = LocalActivity.current as MainActivity
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var isOnline by rememberSaveable { mutableStateOf(false) }
-    var isConnecting by remember { mutableStateOf(false) }
+    var isConnecting by rememberSaveable { mutableStateOf(false) }
+
     val userProfile = AppData.userProfile
 
-    val broadcastReceiver = remember { object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_SUCCESS -> {
-                    isConnecting = false
-                    isOnline = true
-                }
-                ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_ERROR -> {
-                    isConnecting = false
-                    isOnline = false
-                    Toast.makeText(context, "Failed to go online. Please try again.", Toast.LENGTH_SHORT).show()
+    LaunchedEffect(Unit) {
+        isOnline = isServiceRunning(context, ProviderOnlineService::class.java)
+        isConnecting = false
+    }
+
+    val onSuccess = {
+        isConnecting = false
+        isOnline = true
+    }
+    val onError = {
+        isConnecting = false
+        isOnline = false
+        Toast.makeText(context, "your are now offline.", Toast.LENGTH_SHORT).show()
+    }
+
+    val broadcastReceiver = remember {
+        object : BroadcastReceiver() {
+            override fun onReceive(ctx: Context, intent: Intent) {
+                when (intent.action) {
+                    ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_SUCCESS -> onSuccess()
+                    ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_ERROR -> onError()
                 }
             }
         }
-    } }
+    }
 
     DisposableEffect(Unit) {
         val filter = IntentFilter().apply {
             addAction(ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_SUCCESS)
             addAction(ProviderOnlineService.ACTION_REALTIME_SUBSCRIPTION_ERROR)
         }
-        ContextCompat.registerReceiver(context, broadcastReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-
+        ContextCompat.registerReceiver(
+            context,
+            broadcastReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
         onDispose {
             context.unregisterReceiver(broadcastReceiver)
         }
     }
+
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -271,6 +300,7 @@ fun BlueCollarMainScreen() {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(text = if (isOnline) "Online" else "Offline")
                                 Spacer(modifier = Modifier.width(8.dp))
+
                                 if (isConnecting) {
                                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                 } else {
@@ -280,12 +310,6 @@ fun BlueCollarMainScreen() {
                                             if (checked) {
                                                 isConnecting = true
                                                 context.ensureNotificationPermissionThen {
-//                                                    val sessionManager = SessionManager(context)
-//                                                    val providerCities = AppData.userProfile?.cities ?: emptyList()
-//                                                    val providerServices = AppData.userProfile?.services ?: emptyList()
-//                                                    sessionManager.saveCities(providerCities)
-//                                                    sessionManager.saveServices(providerServices)
-
                                                     ContextCompat.startForegroundService(
                                                         context,
                                                         Intent(context, ProviderOnlineService::class.java)
@@ -294,7 +318,9 @@ fun BlueCollarMainScreen() {
                                             } else {
                                                 isOnline = false
                                                 isConnecting = false
-                                                context.stopService(Intent(context, ProviderOnlineService::class.java))
+                                                context.stopService(
+                                                    Intent(context, ProviderOnlineService::class.java)
+                                                )
                                             }
                                         },
                                         colors = SwitchDefaults.colors(
@@ -306,7 +332,10 @@ fun BlueCollarMainScreen() {
                         }
                     },
                     actions = {
-                        if (userProfile?.isServiceProvider == true && isOnline && currentDestination == AppDestinations.HOME) {
+                        if (userProfile?.isServiceProvider == true &&
+                            isOnline &&
+                            currentDestination == AppDestinations.HOME
+                        ) {
                             IconButton(onClick = {
                                 context.startActivity(Intent(context, JobActivity::class.java))
                             }) {
@@ -316,6 +345,7 @@ fun BlueCollarMainScreen() {
                                 )
                             }
                         }
+
                         IconButton(onClick = {
                             context.startActivity(Intent(context, NotificationsActivity::class.java))
                         }) {
@@ -372,6 +402,13 @@ enum class AppDestinations(
 ) {
     HOME("Home", Icons.Filled.Home),
     SERVICE("Service", Icons.Filled.Menu),
-
     PROFILE("Profile", Icons.Filled.Person),
+}
+
+
+fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    @Suppress("DEPRECATION")
+    return am.getRunningServices(Int.MAX_VALUE)
+        .any { it.service.className == serviceClass.name }
 }

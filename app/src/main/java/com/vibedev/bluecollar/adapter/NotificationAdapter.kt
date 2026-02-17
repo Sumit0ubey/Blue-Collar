@@ -11,6 +11,7 @@ import com.vibedev.bluecollar.data.Notification
 import com.vibedev.bluecollar.utils.ColorExtractor
 import com.vibedev.bluecollar.utils.capitalizeFirst
 import com.vibedev.bluecollar.utils.capitalizeEachWord
+import com.vibedev.bluecollar.utils.getDrawableForNotification
 import com.vibedev.bluecollar.databinding.ItemNotificationBinding
 
 class NotificationAdapter(
@@ -23,7 +24,7 @@ class NotificationAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(n: Notification) {
 
-            val iconDrawable = ContextCompat.getDrawable(itemView.context, n.iconRes)
+            val iconDrawable = ContextCompat.getDrawable(itemView.context, getDrawableForNotification(n.iconRes))
 
             binding.icon.setImageDrawable(iconDrawable)
 

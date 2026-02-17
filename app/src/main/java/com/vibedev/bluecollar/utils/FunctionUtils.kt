@@ -3,6 +3,7 @@ package com.vibedev.bluecollar.utils
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import com.vibedev.bluecollar.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,6 +34,18 @@ fun logWarning(tag: String, message: String) {
 fun logVerbose(tag: String, message: String) {
     Log.v(tag, message)
 }
+
+fun getDrawableForNotification(service: String): Int {
+    return when(service) {
+        "rating_icon" -> R.drawable.star_icon
+        "message_icon" -> R.drawable.message_icon
+        "payment_icon" -> R.drawable.payment_icon
+        "confirmed_icon" -> R.drawable.check_icon
+        "job_request_icon" -> R.drawable.work_icon
+        else -> R.drawable.notifications_icon
+    }
+}
+
 
 fun formatTimeAgo(time: String): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())

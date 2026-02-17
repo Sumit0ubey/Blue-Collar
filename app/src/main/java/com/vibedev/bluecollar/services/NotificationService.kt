@@ -31,9 +31,9 @@ class NotificationService(client: Client) {
                 Notification(
                     id = doc.id,
                     title = data["title"] as String,
-                    message = data["description"] as? String ?: "",
+                    message = data["description"] as String,
                     time = formatTimeAgo(data[$$"$updatedAt"] as String),
-                    iconRes = (data["iconResourceId"] as? Number)?.toInt() ?: 0,
+                    iconRes = data["iconResource"] as String,
                     isRead = data["isRead"] as Boolean,
                 )
             }

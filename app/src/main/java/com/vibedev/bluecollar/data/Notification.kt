@@ -5,6 +5,6 @@ data class Notification(
     val title: String,
     val message: String,
     val time: String,
-    val iconRes: Int,
+    val iconRes: String,
     var isRead: Boolean = false
 )

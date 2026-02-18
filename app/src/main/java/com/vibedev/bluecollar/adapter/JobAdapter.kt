@@ -64,6 +64,10 @@ class JobAdapter : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback())
             binding.cancelButton.setOnClickListener {
                 AppwriteManager.functions.cancelJob(job.id)
             }
+
+            binding.markCompleteButton.setOnClickListener {
+
+            }
         }
     }
 

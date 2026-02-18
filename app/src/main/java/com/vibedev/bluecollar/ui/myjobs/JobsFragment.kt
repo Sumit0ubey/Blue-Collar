@@ -57,7 +57,6 @@ class JobsFragment : Fragment() {
 
         setupRecyclerView()
         setupClickListeners()
-
         fetchData()
     }
 
@@ -71,12 +70,12 @@ class JobsFragment : Fragment() {
     private fun setupClickListeners() {
         binding.currentJobsHeader.setOnClickListener {
             isCurrentJobsVisible = !isCurrentJobsVisible
-            toggleJobsSectionVisibility(binding.currentJobsGroup, binding.currentJobsHeader, isCurrentJobsVisible)
+            toggleJobsSectionVisibility(JobType.CURRENT, binding.currentJobsHeader, isCurrentJobsVisible)
         }
 
         binding.previousJobsHeader.setOnClickListener {
             isPreviousJobsVisible = !isPreviousJobsVisible
-            toggleJobsSectionVisibility(binding.previousJobsGroup, binding.previousJobsHeader, isPreviousJobsVisible)
+            toggleJobsSectionVisibility(JobType.PREVIOUS, binding.previousJobsHeader, isPreviousJobsVisible)
         }
 
         binding.refreshCurrentJobs.setOnClickListener {
@@ -108,13 +107,43 @@ class JobsFragment : Fragment() {
         }
     }
 
-    private fun toggleJobsSectionVisibility(group: View, header: TextView, isVisible: Boolean) {
-        group.isVisible = isVisible
-        val drawable = if (isVisible) R.drawable.ic_keyboard_arrow_up else R.drawable.ic_keyboard_arrow_down
-        header.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
+    private fun toggleJobsSectionVisibility(jobType: JobType, header: TextView, isVisible: Boolean) {
+        val drawableId = if (isVisible) R.drawable.ic_keyboard_arrow_up else R.drawable.ic_keyboard_arrow_down
+        header.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawableId, 0)
+
+        val recyclerView: RecyclerView
+        val emptyView: View
+        val adapter: JobAdapter
+
+        when (jobType) {
+            JobType.CURRENT -> {
+                recyclerView = binding.currentJobsRecyclerView
+                emptyView = binding.currentJobsEmpty
+                adapter = currentJobsAdapter
+            }
+            JobType.PREVIOUS -> {
+                recyclerView = binding.previousJobsRecyclerView
+                emptyView = binding.previousJobsEmpty
+                adapter = previousJobsAdapter
+                binding.previousJobsFilterContainer.isVisible = isVisible
+            }
+        }
+
+        if (isVisible) {
+            val isListEmpty = adapter.currentList.isEmpty()
+            recyclerView.isVisible = !isListEmpty
+            emptyView.isVisible = isListEmpty
+        } else {
+            recyclerView.isVisible = false
+            emptyView.isVisible = false
+        }
     }
 
-    private fun updateOverallProgress() {
+    private fun setLoadingState(jobType: JobType, isLoading: Boolean) {
+        when (jobType) {
+            JobType.CURRENT -> isCurrentJobsLoading = isLoading
+            JobType.PREVIOUS -> isPreviousJobsLoading = isLoading
+        }
         _binding?.jobsProgress?.isVisible = isCurrentJobsLoading || isPreviousJobsLoading
     }
 
@@ -136,18 +165,9 @@ class JobsFragment : Fragment() {
         }
     }
 
-    private fun setLoadingFlag(jobType: JobType, isLoading: Boolean) {
-        when (jobType) {
-            JobType.CURRENT -> isCurrentJobsLoading = isLoading
-            JobType.PREVIOUS -> isPreviousJobsLoading = isLoading
-        }
-    }
-
     private fun fetchJobs(jobType: JobType, jobsFetcher: suspend () -> List<Job>?) {
-        setLoadingFlag(jobType, true)
-        updateOverallProgress()
+        setLoadingState(jobType, true)
 
-        val group: View
         val emptyView: View
         val recyclerView: RecyclerView
         val adapter: JobAdapter
@@ -155,14 +175,12 @@ class JobsFragment : Fragment() {
 
         when (jobType) {
             JobType.CURRENT -> {
-                group = binding.currentJobsGroup
                 emptyView = binding.currentJobsEmpty
                 recyclerView = binding.currentJobsRecyclerView
                 adapter = currentJobsAdapter
                 isSectionVisible = isCurrentJobsVisible
             }
             JobType.PREVIOUS -> {
-                group = binding.previousJobsGroup
                 emptyView = binding.previousJobsEmpty
                 recyclerView = binding.previousJobsRecyclerView
                 adapter = previousJobsAdapter
@@ -170,34 +188,29 @@ class JobsFragment : Fragment() {
             }
         }
 
-        group.isVisible = false
-
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val jobs = jobsFetcher()
+                adapter.submitList(jobs)
                 _binding?.let {
-                    val jobsIsNullOrEmpty = jobs.isNullOrEmpty()
-                    emptyView.isVisible = jobsIsNullOrEmpty
-                    recyclerView.isVisible = !jobsIsNullOrEmpty
-                    if (!jobsIsNullOrEmpty) {
-                        adapter.submitList(jobs)
+                    if (isSectionVisible) {
+                        val jobsIsNullOrEmpty = jobs.isNullOrEmpty()
+                        emptyView.isVisible = jobsIsNullOrEmpty
+                        recyclerView.isVisible = !jobsIsNullOrEmpty
                     }
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 Log.e(TAG, "Error fetching $jobType jobs: ${e.message}")
-                _binding?.let {
-                    emptyView.isVisible = true
-                    recyclerView.isVisible = false
-                }
-            } finally {
+                adapter.submitList(null)
                 _binding?.let {
                     if (isSectionVisible) {
-                        group.isVisible = true
+                        emptyView.isVisible = true
+                        recyclerView.isVisible = false
                     }
                 }
-                setLoadingFlag(jobType, false)
-                updateOverallProgress()
+            } finally {
+                setLoadingState(jobType, false)
             }
         }
     }

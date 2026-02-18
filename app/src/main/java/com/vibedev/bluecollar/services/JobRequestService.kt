@@ -13,9 +13,7 @@ import io.appwrite.Query
 import io.appwrite.Role
 import io.appwrite.services.Databases
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 class JobRequestService(client: Client) {
 

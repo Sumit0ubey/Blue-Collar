@@ -76,7 +76,7 @@ class HomeFragment : Fragment() {
         val adapter =
             ArrayAdapter(
                 requireContext(),
-                android.R.layout.simple_dropdown_item_1line,
+                android.R.layout.simple_list_item_1,
                 AppData.serviceTypes
             )
         dialogBinding.formServiceType.setAdapter(adapter)

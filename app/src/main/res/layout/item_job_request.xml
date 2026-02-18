@@ -87,7 +87,7 @@
             android:layout_height="24dp"
             android:layout_marginTop="8dp"
             android:contentDescription="@string/cost"
-            android:src="@drawable/ic_attach_money_24"
+            android:src="@drawable/money_icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/job_city"
             app:tint="?attr/colorControlNormal" />

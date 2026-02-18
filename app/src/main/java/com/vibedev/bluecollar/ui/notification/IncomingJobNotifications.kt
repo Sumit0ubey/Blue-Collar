@@ -16,6 +16,7 @@ import android.os.Looper
 import android.os.Build
 
 import com.vibedev.bluecollar.R
+import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.ui.IncomingRequestActivity
 
 object IncomingJobNotifications {
@@ -81,6 +82,8 @@ object IncomingJobNotifications {
             putExtra("description", payload["description"] as? String ?: "")
             putExtra("address", payload["address"] as? String ?: "")
             putExtra("cost", payload["cost"] as? String ?: "")
+            putExtra("providerName", AppData.userProfile?.name as String)
+            putExtra("providerNumber", AppData.userProfile?.phone as String)
         }
 
         val pi = PendingIntent.getActivity(

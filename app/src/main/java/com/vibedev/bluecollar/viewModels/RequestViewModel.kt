@@ -3,6 +3,7 @@ package com.vibedev.bluecollar.viewModels
 import androidx.lifecycle.ViewModel
 
 import com.vibedev.bluecollar.data.AppData
+import com.vibedev.bluecollar.data.Job
 import com.vibedev.bluecollar.data.JobRequest
 import com.vibedev.bluecollar.manager.AppwriteManager
 
@@ -27,8 +28,16 @@ class RequestViewModel : ViewModel() {
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {
         return AppwriteManager.request.getOpenJobs(city, serviceType)
     }
+    
+    suspend fun getCurrentRequests(): List<Job> {
+        return AppwriteManager.request.getCurrentJobRequests()
+    }
+    
+    suspend fun getPreviousRequestOfToday(): List<Job> {
+        return AppwriteManager.request.getPreviousJobsRequestOfToday()
+    }
 
-    suspend fun updateJobRequestStatus(jobRequestId: String, status: String) {
-        return AppwriteManager.request.updateJobRequestStatus(jobRequestId, status)
+    suspend fun getPreviousRequestOfThisWeek(): List<Job> {
+        return AppwriteManager.request.getPreviousJobsRequestOfThisWeek()
     }
 }

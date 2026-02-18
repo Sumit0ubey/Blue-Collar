@@ -30,14 +30,14 @@ class JobHistoryService(client: Client) {
         return try {
             val customerJobsResponse = databases.listDocuments(
                 databaseId = AppData.DATABASE_ID,
-                collectionId = AppData.JOB_HISTORY_COLLECTION_ID,
+                collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
                 queries = filterQueries + Query.equal("customerId", userId) + Query.equal("isComplete", true)
             )
 
             val providerJobsResponse = databases.listDocuments(
                 databaseId = AppData.DATABASE_ID,
-                collectionId = AppData.JOB_HISTORY_COLLECTION_ID,
-                queries = filterQueries + Query.equal("serviceProviderId", userId) + Query.equal("isComplete", true)
+                collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
+                queries = filterQueries + Query.equal("assignedProviderId", userId) + Query.equal("isComplete", true)
             )
 
             (customerJobsResponse.documents + providerJobsResponse.documents)
@@ -53,7 +53,7 @@ class JobHistoryService(client: Client) {
         return JobHistory(
             id = this.id,
             serviceType = data["serviceType"] as String,
-            summary = data["summary"] as String,
+            summary = data["description"] as String,
             cost = "₹" + data["cost"] as String,
         )
     }

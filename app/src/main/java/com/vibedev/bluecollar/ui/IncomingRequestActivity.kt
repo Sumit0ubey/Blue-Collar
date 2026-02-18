@@ -41,6 +41,8 @@ class IncomingRequestActivity : AppCompatActivity() {
         val cost = intent.getStringExtra("cost") ?: ""
         val city = intent.getStringExtra("city") ?: ""
         val serviceType = intent.getStringExtra("serviceType") ?: ""
+        val providerName = intent.getStringExtra("providerName") ?: ""
+        val providerNumber = intent.getStringExtra("providerNumber") ?: ""
 
         binding.tvName.text = name
         binding.tvServiceType.text = getString(R.string.service_label, serviceType)
@@ -83,7 +85,7 @@ class IncomingRequestActivity : AppCompatActivity() {
             showLoading(true)
             lifecycleScope.launch {
                 try {
-                    AppwriteManager.functions.acceptJob(jobId)
+                    AppwriteManager.functions.acceptJob(jobId, providerName, providerNumber)
                 } catch (e: Exception) {
                     logError(tag, "Job already taken or cancelled", e)
                     showToast(this@IncomingRequestActivity, "Job already taken")

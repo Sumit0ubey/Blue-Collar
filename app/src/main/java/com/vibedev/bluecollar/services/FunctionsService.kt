@@ -78,10 +78,12 @@ class FunctionsService(client: Client) {
         }
     }
 
-    suspend fun acceptJob(jobId: String): Boolean {
+    suspend fun acceptJob(jobId: String, providerName: String, providerNumber: String): Boolean {
         return try {
             val body = JSONObject()
                 .put("jobId", jobId)
+                .put("providerName", providerName)
+                .put("providerNumber", providerNumber)
                 .toString()
 
             val execution = functions.createExecution(
@@ -105,4 +107,6 @@ class FunctionsService(client: Client) {
             false
         }
     }
+
+    fun cancelJob(jobId: String){}
 }

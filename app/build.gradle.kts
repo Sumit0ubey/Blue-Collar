@@ -84,4 +84,5 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.7.0")
 
     implementation("androidx.lifecycle:lifecycle-process:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.2")
 }

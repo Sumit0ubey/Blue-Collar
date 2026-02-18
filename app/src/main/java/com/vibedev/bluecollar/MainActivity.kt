@@ -46,6 +46,7 @@ import com.vibedev.bluecollar.ui.JobActivity
 import com.vibedev.bluecollar.ui.auth.AdditionalInfoActivity
 import com.vibedev.bluecollar.ui.auth.LoginActivity
 import com.vibedev.bluecollar.ui.home.HomeFragment
+import com.vibedev.bluecollar.ui.myjobs.JobsFragment
 import com.vibedev.bluecollar.ui.notification.NotificationsActivity
 import com.vibedev.bluecollar.ui.profile.ProfileFragment
 import com.vibedev.bluecollar.ui.service.ServiceFragment
@@ -53,7 +54,6 @@ import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
 import com.vibedev.bluecollar.ui.theme.blue_500
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
@@ -361,6 +361,7 @@ fun BlueCollarMainScreen() {
             val currentFragment = remember(currentDestination) {
                 when (currentDestination) {
                     AppDestinations.HOME -> HomeFragment()
+                    AppDestinations.JOBS -> JobsFragment()
                     AppDestinations.SERVICE -> ServiceFragment()
                     AppDestinations.PROFILE -> ProfileFragment()
                 }
@@ -401,6 +402,7 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Filled.Home),
+    JOBS("My Jobs", Icons.Filled.Window),
     SERVICE("Service", Icons.Filled.Menu),
     PROFILE("Profile", Icons.Filled.Person),
 }

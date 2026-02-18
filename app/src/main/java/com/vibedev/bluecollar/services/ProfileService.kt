@@ -92,7 +92,6 @@ class ProfileService(client: Client) {
             )
         } catch (e: Exception) {
             logError(TAG, "Error updating profile for user $userId", e)
-            throw e
         }
     }
 }

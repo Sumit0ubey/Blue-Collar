@@ -23,8 +23,8 @@ import kotlinx.coroutines.launch
 class JobsFragment : Fragment() {
 
     private val requestViewModel: RequestViewModel by viewModels()
-    private val currentJobsAdapter = JobAdapter()
-    private val previousJobsAdapter = JobAdapter()
+    private val currentJobsAdapter by lazy { JobAdapter(requestViewModel) }
+    private val previousJobsAdapter by lazy { JobAdapter(requestViewModel) }
 
     private var _binding: FragmentJobsBinding? = null
     private val binding get() = _binding!!
@@ -34,6 +34,7 @@ class JobsFragment : Fragment() {
 
     private var isCurrentJobsLoading = false
     private var isPreviousJobsLoading = false
+    private var isActionLoading = false
 
     private enum class Filter { TODAY, THIS_WEEK }
     private var currentFilter = Filter.TODAY
@@ -57,6 +58,7 @@ class JobsFragment : Fragment() {
 
         setupRecyclerView()
         setupClickListeners()
+        observeViewModel()
         fetchData()
     }
 
@@ -107,6 +109,19 @@ class JobsFragment : Fragment() {
         }
     }
 
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            requestViewModel.isLoading.collect { isLoading ->
+                isActionLoading = isLoading
+                updateGlobalLoadingState()
+                if (!isLoading) {
+                    // When an action is completed, refresh the job lists to reflect changes
+                    fetchData()
+                }
+            }
+        }
+    }
+
     private fun toggleJobsSectionVisibility(jobType: JobType, header: TextView, isVisible: Boolean) {
         val drawableId = if (isVisible) R.drawable.ic_keyboard_arrow_up else R.drawable.ic_keyboard_arrow_down
         header.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawableId, 0)
@@ -139,12 +154,16 @@ class JobsFragment : Fragment() {
         }
     }
 
+    private fun updateGlobalLoadingState() {
+        _binding?.jobsProgress?.isVisible = isCurrentJobsLoading || isPreviousJobsLoading || isActionLoading
+    }
+
     private fun setLoadingState(jobType: JobType, isLoading: Boolean) {
         when (jobType) {
             JobType.CURRENT -> isCurrentJobsLoading = isLoading
             JobType.PREVIOUS -> isPreviousJobsLoading = isLoading
         }
-        _binding?.jobsProgress?.isVisible = isCurrentJobsLoading || isPreviousJobsLoading
+        updateGlobalLoadingState()
     }
 
     private fun fetchData() {

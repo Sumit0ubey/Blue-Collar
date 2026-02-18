@@ -165,4 +165,17 @@ class JobRequestService(client: Client) {
             )
         )
     }
+
+    suspend fun updateJobStatus(jobId: String, newStatus: String) {
+        try {
+            databases.updateDocument(
+                databaseId = AppData.DATABASE_ID,
+                collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
+                documentId = jobId,
+                data = mapOf("status" to newStatus)
+            )
+        }catch (e: Exception){
+            logError(tag, "Error updating job status for job $jobId", e)
+        }
+    }
 }

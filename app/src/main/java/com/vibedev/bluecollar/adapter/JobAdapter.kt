@@ -3,19 +3,23 @@ package com.vibedev.bluecollar.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.data.Job
 import com.vibedev.bluecollar.databinding.ItemJobBinding
-import com.vibedev.bluecollar.manager.AppwriteManager
 import com.vibedev.bluecollar.utils.capitalizeEachWord
 import com.vibedev.bluecollar.utils.capitalizeFirst
+import com.vibedev.bluecollar.viewModels.RequestViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class JobAdapter : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback()) {
+class JobAdapter(private val requestViewModel: RequestViewModel) :
+    ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
         val binding = ItemJobBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -27,7 +31,8 @@ class JobAdapter : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback())
         holder.bind(job)
     }
 
-    class JobViewHolder(private val binding: ItemJobBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class JobViewHolder(private val binding: ItemJobBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(job: Job) {
             binding.jobTitle.text = "Professional ${job.serviceType.capitalizeFirst()} Needed"
@@ -37,7 +42,8 @@ class JobAdapter : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback())
             binding.jobCost.text = "₹ ${job.cost}"
 
             if (job.date != null) {
-                binding.jobDate.text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(job.date)
+                binding.jobDate.text =
+                    SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(job.date)
             } else {
                 binding.jobDate.text = "Date not available"
             }
@@ -55,18 +61,22 @@ class JobAdapter : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback())
 
             binding.jobLocation.text = "${job.city}, ${job.address}"
 
-            if (AppData.authToken == job.customerId){
+            if (AppData.authToken == job.customerId) {
                 binding.cancelButton.visibility = View.VISIBLE
-            }else{
+            } else {
                 binding.cancelButton.visibility = View.GONE
             }
 
             binding.cancelButton.setOnClickListener {
-                AppwriteManager.functions.cancelJob(job.id)
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    requestViewModel.cancelJobRequest(job.id)
+                }
             }
 
             binding.markCompleteButton.setOnClickListener {
-
+                itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                    requestViewModel.markJobAsComplete(job.id)
+                }
             }
         }
     }

@@ -38,7 +38,7 @@ This project follows the official Android guide to app architecture and uses the
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/blue-collar.git
+    git clone https://github.com/Sumit0ubey/blue-collar.git
     ```
 2.  **Open in Android Studio:**
     Open the project in the latest stable version of Android Studio.

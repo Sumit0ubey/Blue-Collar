@@ -61,10 +61,16 @@ class JobAdapter(private val requestViewModel: RequestViewModel) :
 
             binding.jobLocation.text = "${job.city}, ${job.address}"
 
-            if (AppData.authToken == job.customerId) {
+            if (AppData.authToken == job.customerId && (job.status == AppData.OPEN || job.status == AppData.ACCEPTED)) {
                 binding.cancelButton.visibility = View.VISIBLE
             } else {
                 binding.cancelButton.visibility = View.GONE
+            }
+
+            if (AppData.authToken == job.customerId && job.status == AppData.ACCEPTED){
+                binding.markCompleteButton.visibility = View.VISIBLE
+            } else {
+                binding.markCompleteButton.visibility = View.GONE
             }
 
             binding.cancelButton.setOnClickListener {

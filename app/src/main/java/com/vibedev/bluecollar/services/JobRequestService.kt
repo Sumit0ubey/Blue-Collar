@@ -51,7 +51,7 @@ class JobRequestService(client: Client) {
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {
         return try {
             val queries = mutableListOf(
-                Query.equal("status", "open"),
+                Query.equal("status", AppData.OPEN),
                 Query.orderDesc($$"$createdAt"),
                 Query.limit(50)
             )
@@ -141,15 +141,15 @@ class JobRequestService(client: Client) {
     }
 
     suspend fun getCurrentJobRequests(): List<Job> {
-        return getJobs(listOf(Query.equal("status", listOf("open", "accepted"))))
+        return getJobs(listOf(Query.equal("status", listOf(AppData.OPEN, AppData.ACCEPTED))))
     }
 
     suspend fun getPreviousJobsRequestOfToday(): List<Job> {
         val (start, end) = getTodayDateRangeISO()
         return getJobs(
             listOf(
-                Query.notEqual("status", "open"),
-                Query.notEqual("status", "accepted"),
+                Query.notEqual("status", AppData.OPEN),
+                Query.notEqual("status", AppData.ACCEPTED),
                 Query.between($$"$updatedAt", start, end)
             )
         )
@@ -159,8 +159,8 @@ class JobRequestService(client: Client) {
         val (start, end) = getThisWeekDateRangeISO()
         return getJobs(
             listOf(
-                Query.notEqual("status", "open"),
-                Query.notEqual("status", "accepted"),
+                Query.notEqual("status", AppData.OPEN),
+                Query.notEqual("status", AppData.ACCEPTED),
                 Query.between($$"$updatedAt", start, end)
             )
         )
@@ -172,7 +172,10 @@ class JobRequestService(client: Client) {
                 databaseId = AppData.DATABASE_ID,
                 collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
                 documentId = jobId,
-                data = mapOf("status" to newStatus)
+                data = mapOf(
+                    "status" to newStatus,
+                    "isComplete" to (newStatus == AppData.COMPLETED)
+                )
             )
         }catch (e: Exception){
             logError(tag, "Error updating job status for job $jobId", e)

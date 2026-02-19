@@ -107,6 +107,4 @@ class FunctionsService(client: Client) {
             false
         }
     }
-
-    fun cancelJob(jobId: String){}
 }

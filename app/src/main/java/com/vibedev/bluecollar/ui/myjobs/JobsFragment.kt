@@ -1,7 +1,6 @@
 package com.vibedev.bluecollar.ui.myjobs
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +17,8 @@ import com.vibedev.bluecollar.R
 import com.vibedev.bluecollar.adapter.JobAdapter
 import com.vibedev.bluecollar.data.Job
 import com.vibedev.bluecollar.databinding.FragmentJobsBinding
+import com.vibedev.bluecollar.utils.logDebug
+import com.vibedev.bluecollar.utils.logError
 import com.vibedev.bluecollar.viewModels.RequestViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job as CoroutineJob
@@ -28,8 +29,17 @@ class JobsFragment : Fragment() {
 
     private val requestViewModel: RequestViewModel by viewModels()
 
-    private val currentJobsAdapter by lazy { JobAdapter(requestViewModel) }
-    private val previousJobsAdapter by lazy { JobAdapter(requestViewModel) }
+    private val currentJobsAdapter by lazy {
+        JobAdapter(requestViewModel) {
+            fetchData(force = true)
+        }
+    }
+
+    private val previousJobsAdapter by lazy {
+        JobAdapter(requestViewModel) {
+            fetchData(force = true)
+        }
+    }
 
     private var _binding: FragmentJobsBinding? = null
     private val binding get() = _binding!!
@@ -78,7 +88,7 @@ class JobsFragment : Fragment() {
         applySectionVisibility(JobType.CURRENT)
         applySectionVisibility(JobType.PREVIOUS)
 
-        fetchData()
+        fetchData(force = false)
     }
 
     private fun setupRecyclerView() {
@@ -109,12 +119,12 @@ class JobsFragment : Fragment() {
         }
 
         binding.refreshCurrentJobs.setOnClickListener {
-            Log.d(TAG, "Refresh CURRENT clicked")
+            logDebug(TAG, "Refresh CURRENT clicked")
             fetchCurrentJobs(force = true)
         }
 
         binding.refreshPreviousJobs.setOnClickListener {
-            Log.d(TAG, "Refresh PREVIOUS clicked")
+            logDebug(TAG, "Refresh PREVIOUS clicked")
             fetchPreviousJobs(force = true)
         }
 
@@ -135,11 +145,10 @@ class JobsFragment : Fragment() {
             if (newFilter == currentFilter) return@setOnCheckedStateChangeListener
             currentFilter = newFilter
 
-            // debounce
             filterDebounceJob?.cancel()
             filterDebounceJob = viewLifecycleOwner.lifecycleScope.launch {
                 delay(250)
-                Log.d(TAG, "Chip changed -> fetch PREVIOUS. filter=$currentFilter")
+                logDebug(TAG, "Chip changed -> fetch PREVIOUS. filter=$currentFilter")
                 fetchPreviousJobs(force = true)
             }
         }
@@ -227,9 +236,9 @@ class JobsFragment : Fragment() {
         updateGlobalLoadingState()
     }
 
-    private fun fetchData() {
-        fetchCurrentJobs(force = false)
-        fetchPreviousJobs(force = false)
+    private fun fetchData(force: Boolean) {
+        fetchCurrentJobs(force = force)
+        fetchPreviousJobs(force = force)
     }
 
     private fun fetchCurrentJobs(force: Boolean) {
@@ -266,16 +275,16 @@ class JobsFragment : Fragment() {
 
         return viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Log.d(TAG, "Fetching $jobType jobs...")
+                logDebug(TAG, "Fetching $jobType jobs...")
                 val jobs = jobsFetcher().orEmpty()
-                Log.d(TAG, "Fetched $jobType jobs size=${jobs.size}")
+                logDebug(TAG, "Fetched $jobType jobs size=${jobs.size}")
 
                 adapter.submitList(jobs)
                 applySectionVisibility(jobType)
 
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                Log.e(TAG, "Error fetching $jobType jobs", e)
+                logError(TAG, "Error fetching $jobType jobs", e)
 
                 adapter.submitList(emptyList())
                 applySectionVisibility(jobType)

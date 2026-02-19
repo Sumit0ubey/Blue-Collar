@@ -52,7 +52,7 @@ class JobRequestService(client: Client) {
         return try {
             val queries = mutableListOf(
                 Query.equal("status", AppData.OPEN),
-                Query.orderDesc($$"$createdAt"),
+                Query.orderDesc($$"$updatedAt"),
                 Query.limit(50)
             )
 
@@ -96,7 +96,7 @@ class JobRequestService(client: Client) {
 
         val allJobDocuments = (jobsAsCustomer + jobsAsProvider).distinctBy { it.id }
 
-        return mapDocumentsToJobs(allJobDocuments)
+        return mapDocumentsToJobs(allJobDocuments).sortedByDescending { it.date }
     }
 
     private suspend fun fetchJobsWithQueries(queries: List<String>, role: String, userId: String): List<io.appwrite.models.Document<Map<String, Any>>> {
@@ -131,7 +131,7 @@ class JobRequestService(client: Client) {
                     address = data["address"] as String,
                     cost = data["cost"] as String,
                     status = data["status"] as String,
-                    date = sdfISO.parse(doc.createdAt)
+                    date = sdfISO.parse(doc.updatedAt)
                 )
             } catch (e: Exception) {
                 logError(tag, "Failed to map document ${doc.id} to Job object", e)
@@ -141,7 +141,10 @@ class JobRequestService(client: Client) {
     }
 
     suspend fun getCurrentJobRequests(): List<Job> {
-        return getJobs(listOf(Query.equal("status", listOf(AppData.OPEN, AppData.ACCEPTED))))
+        return getJobs(listOf(
+            Query.equal("status", listOf(AppData.OPEN, AppData.ACCEPTED)),
+            Query.orderDesc($$"$updatedAt")
+        ))
     }
 
     suspend fun getPreviousJobsRequestOfToday(): List<Job> {
@@ -150,7 +153,8 @@ class JobRequestService(client: Client) {
             listOf(
                 Query.notEqual("status", AppData.OPEN),
                 Query.notEqual("status", AppData.ACCEPTED),
-                Query.between($$"$updatedAt", start, end)
+                Query.between($$"$updatedAt", start, end),
+                Query.orderDesc($$"$updatedAt")
             )
         )
     }
@@ -161,7 +165,8 @@ class JobRequestService(client: Client) {
             listOf(
                 Query.notEqual("status", AppData.OPEN),
                 Query.notEqual("status", AppData.ACCEPTED),
-                Query.between($$"$updatedAt", start, end)
+                Query.between($$"$updatedAt", start, end),
+                Query.orderDesc($$"$updatedAt")
             )
         )
     }

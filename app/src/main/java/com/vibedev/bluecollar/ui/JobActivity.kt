@@ -42,6 +42,15 @@ class JobActivity: AppCompatActivity() {
         binding.applyButton.setOnClickListener {
             fetchJobRequest()
         }
+        observeLoadingState()
+    }
+
+    private fun observeLoadingState() {
+        lifecycleScope.launch {
+            requestViewModel.isLoading.collect { isLoading ->
+                showLoading(isLoading)
+            }
+        }
     }
 
     private fun setupDropdowns(){
@@ -104,7 +113,9 @@ class JobActivity: AppCompatActivity() {
     }
 
     private fun setupRecyclerView(jobs: List<JobRequest>){
-        val jobAdapter = JobRequestAdapter(jobs)
+        val jobAdapter = JobRequestAdapter(jobs, requestViewModel) {
+            fetchJobRequest()
+        }
         binding.jobRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.jobRecyclerView.adapter = jobAdapter
     }

@@ -1,16 +1,20 @@
 package com.vibedev.bluecollar.adapter
 
-
-import android.view.ViewGroup
 import android.view.LayoutInflater
-import com.vibedev.bluecollar.data.JobRequest
+import android.view.ViewGroup
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.vibedev.bluecollar.utils.capitalizeFirst
+import com.vibedev.bluecollar.data.JobRequest
 import com.vibedev.bluecollar.databinding.ItemJobRequestBinding
-
+import com.vibedev.bluecollar.utils.capitalizeFirst
+import com.vibedev.bluecollar.viewModels.RequestViewModel
+import kotlinx.coroutines.launch
 
 class JobRequestAdapter(
-    private val jobs: List<JobRequest>
+    private val jobs: List<JobRequest>,
+    private val requestViewModel: RequestViewModel,
+    private val onJobAccepted: () -> Unit
 ) : RecyclerView.Adapter<JobRequestAdapter.JobRequestViewHolder>() {
 
     inner class JobRequestViewHolder(private val binding: ItemJobRequestBinding) :
@@ -21,7 +25,11 @@ class JobRequestAdapter(
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     val clickedJob = jobs[position]
-                    acceptJob(clickedJob)
+                    itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+                        binding.acceptButton.isEnabled = false
+                        requestViewModel.acceptJob(clickedJob.id)
+                        onJobAccepted()
+                    }
                 }
             }
         }
@@ -51,9 +59,5 @@ class JobRequestAdapter(
 
     override fun getItemCount(): Int {
         return jobs.size
-    }
-
-    private fun acceptJob(job: JobRequest) {
-        // I will develop this function later
     }
 }

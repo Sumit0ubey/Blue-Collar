@@ -18,7 +18,7 @@ class RequestViewModel : ViewModel() {
         if (isFunction) {
             createRequestViaFunction(customerName, number, city, address, serviceDescription, serviceType, pay)
         } else {
-            createRequestViaCollection(AppData.authToken ?: "", customerName, number, city, address, serviceDescription, serviceType)
+            createRequestViaCollection(AppData.authToken ?: "", customerName, city, address, serviceDescription, serviceType, pay)
         }
     }
 
@@ -32,6 +32,18 @@ class RequestViewModel : ViewModel() {
 
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {
         return AppwriteManager.request.getOpenJobs(city, serviceType)
+    }
+
+    suspend fun acceptJob(jobId: String) {
+        _isLoading.value = true
+        val providerName = AppData.userProfile?.name ?: ""
+        val providerNumber = AppData.userProfile?.phone ?: ""
+
+        try {
+            AppwriteManager.functions.acceptJob(jobId, providerName, providerNumber)
+        } finally {
+            _isLoading.value = false
+        }
     }
 
     suspend fun cancelJobRequest(jobId: String) {

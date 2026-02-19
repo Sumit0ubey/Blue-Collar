@@ -14,12 +14,15 @@ import com.vibedev.bluecollar.databinding.ItemJobBinding
 import com.vibedev.bluecollar.utils.capitalizeEachWord
 import com.vibedev.bluecollar.utils.capitalizeFirst
 import com.vibedev.bluecollar.viewModels.RequestViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class JobAdapter(private val requestViewModel: RequestViewModel) :
-    ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback()) {
+class JobAdapter(
+    private val requestViewModel: RequestViewModel,
+    private val onActionDone: (() -> Unit)? = null
+) : ListAdapter<Job, JobAdapter.JobViewHolder>(JobDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JobViewHolder {
         val binding = ItemJobBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -67,7 +70,7 @@ class JobAdapter(private val requestViewModel: RequestViewModel) :
                 binding.cancelButton.visibility = View.GONE
             }
 
-            if (AppData.authToken == job.customerId && job.status == AppData.ACCEPTED){
+            if (AppData.authToken == job.customerId && job.status == AppData.ACCEPTED) {
                 binding.markCompleteButton.visibility = View.VISIBLE
             } else {
                 binding.markCompleteButton.visibility = View.GONE
@@ -75,13 +78,37 @@ class JobAdapter(private val requestViewModel: RequestViewModel) :
 
             binding.cancelButton.setOnClickListener {
                 itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-                    requestViewModel.cancelJobRequest(job.id)
+                    binding.cancelButton.isEnabled = false
+                    binding.markCompleteButton.isEnabled = false
+
+                    try {
+                        requestViewModel.cancelJobRequest(job.id)
+
+                        delay(250)
+
+                        onActionDone?.invoke()
+                    } finally {
+                        binding.cancelButton.isEnabled = true
+                        binding.markCompleteButton.isEnabled = true
+                    }
                 }
             }
 
             binding.markCompleteButton.setOnClickListener {
                 itemView.findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-                    requestViewModel.markJobAsComplete(job.id)
+                    binding.cancelButton.isEnabled = false
+                    binding.markCompleteButton.isEnabled = false
+
+                    try {
+                        requestViewModel.markJobAsComplete(job.id)
+
+                        delay(250)
+
+                        onActionDone?.invoke()
+                    } finally {
+                        binding.cancelButton.isEnabled = true
+                        binding.markCompleteButton.isEnabled = true
+                    }
                 }
             }
         }

@@ -9,6 +9,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 import android.os.*
+import android.view.WindowManager
 
 import com.vibedev.bluecollar.R
 import com.vibedev.bluecollar.utils.logError
@@ -28,6 +29,18 @@ class IncomingRequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityIncomingRequestBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

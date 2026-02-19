@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -129,6 +130,9 @@ class MainActivity : FragmentActivity() {
                 sessionManager.setProfileCompleted(true)
                 if (userProfile != null) {
                     AppData.userProfile = userProfile
+                    if (userProfile.isServiceProvider) {
+                        checkSystemAlertWindowPermission()
+                    }
                 }
 
                 isLoadingState = false
@@ -185,6 +189,23 @@ class MainActivity : FragmentActivity() {
             }
         }
         action()
+    }
+
+    private fun checkSystemAlertWindowPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Permission Required")
+                .setMessage("To receive incoming job alerts, please grant the 'draw over other apps' permission.")
+                .setPositiveButton("Grant") { _, _ ->
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                }
+                .setNegativeButton("Later", null)
+                .show()
+        }
     }
 
     override fun onRequestPermissionsResult(

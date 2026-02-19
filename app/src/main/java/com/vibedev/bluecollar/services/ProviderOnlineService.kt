@@ -11,6 +11,8 @@ import com.vibedev.bluecollar.utils.logError
 import com.vibedev.bluecollar.data.JobUpdate
 import com.vibedev.bluecollar.manager.AppwriteManager
 import com.vibedev.bluecollar.ui.notification.IncomingJobNotifications
+import com.vibedev.bluecollar.ui.IncomingRequestActivity
+import com.vibedev.bluecollar.data.AppData
 
 
 class ProviderOnlineService : LifecycleService() {
@@ -44,10 +46,21 @@ class ProviderOnlineService : LifecycleService() {
                 AppwriteManager.realtime.subscribeToJobs().collect { update ->
                     when (update) {
                         is JobUpdate.OpenJob -> {
-                            val jobId = update.payload["\$id"] as? String ?: return@collect
-                            IncomingJobNotifications.showIncomingFullScreen(
-                                this@ProviderOnlineService, jobId, update.payload
-                            )
+                            val jobId = update.payload[$$"$id"] as? String ?: return@collect
+                            val intent = Intent(this@ProviderOnlineService, IncomingRequestActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                putExtra("jobId", jobId)
+                                putExtra("city", update.payload["city"] as? String ?: "")
+                                putExtra("serviceType", (update.payload["serviceType"] as? String) ?: "")
+                                putExtra("name", update.payload["name"] as? String ?: "")
+                                putExtra("number", update.payload["number"] as? String ?: "")
+                                putExtra("description", update.payload["description"] as? String ?: "")
+                                putExtra("address", update.payload["address"] as? String ?: "")
+                                putExtra("cost", update.payload["cost"] as? String ?: "")
+                                putExtra("providerName", AppData.userProfile?.name as String)
+                                putExtra("providerNumber", AppData.userProfile?.phone as String)
+                            }
+                            startActivity(intent)
                         }
                         is JobUpdate.JobAccepted -> {
                             NotificationManagerCompat.from(this@ProviderOnlineService)

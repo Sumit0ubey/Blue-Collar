@@ -15,7 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.vibedev.bluecollar.R
 import com.vibedev.bluecollar.adapter.JobAdapter
-import com.vibedev.bluecollar.data.Job
+import com.vibedev.bluecollar.data.JobShort
 import com.vibedev.bluecollar.databinding.FragmentJobsBinding
 import com.vibedev.bluecollar.utils.logDebug
 import com.vibedev.bluecollar.utils.logError
@@ -29,17 +29,8 @@ class JobsFragment : Fragment() {
 
     private val requestViewModel: RequestViewModel by viewModels()
 
-    private val currentJobsAdapter by lazy {
-        JobAdapter(requestViewModel) {
-            fetchData(force = true)
-        }
-    }
-
-    private val previousJobsAdapter by lazy {
-        JobAdapter(requestViewModel) {
-            fetchData(force = true)
-        }
-    }
+    private val currentJobsAdapter by lazy { JobAdapter() }
+    private val previousJobsAdapter by lazy { JobAdapter() }
 
     private var _binding: FragmentJobsBinding? = null
     private val binding get() = _binding!!
@@ -87,8 +78,11 @@ class JobsFragment : Fragment() {
 
         applySectionVisibility(JobType.CURRENT)
         applySectionVisibility(JobType.PREVIOUS)
+        fetchData(force = true)
+    }
 
-        fetchData(force = false)
+    override fun onResume() {
+        super.onResume()
     }
 
     private fun setupRecyclerView() {
@@ -264,7 +258,7 @@ class JobsFragment : Fragment() {
 
     private fun fetchJobs(
         jobType: JobType,
-        jobsFetcher: suspend () -> List<Job>?
+        jobsFetcher: suspend () -> List<JobShort>?
     ): CoroutineJob {
         setLoadingState(jobType, true)
 

@@ -13,6 +13,9 @@ gitignore
 # APPWRITE Data file
 /app/src/main/java/com/vibedev/bluecollar/data/AppData.kt
 
+# Security files
+/app/google-services.json
+
 # Generated files
 bin/
 gen/

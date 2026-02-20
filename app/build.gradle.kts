@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -59,6 +60,10 @@ dependencies {
     
     // Appwrite for backend services
     implementation("io.appwrite:sdk-for-android:8.1.0")
+
+    // Firebase for notifications
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation("com.google.firebase:firebase-messaging")
 
     //Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")

@@ -3,6 +3,7 @@ package com.vibedev.bluecollar.services
 import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.data.Job
 import com.vibedev.bluecollar.data.JobRequest
+import com.vibedev.bluecollar.data.JobShort
 import com.vibedev.bluecollar.utils.getThisWeekDateRangeISO
 import com.vibedev.bluecollar.utils.getTodayDateRangeISO
 import com.vibedev.bluecollar.utils.logError
@@ -48,6 +49,39 @@ class JobRequestService(client: Client) {
         }
     }
 
+    suspend fun getJobById(jobId: String): Job? {
+        val sdfISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
+        return try {
+            val doc = databases.getDocument(
+                AppData.DATABASE_ID,
+                AppData.JOB_REQUEST_COLLECTION_ID,
+                jobId
+            )
+
+            val data = doc.data
+            Job(
+                id = doc.id,
+                customerId = data["customerId"] as String,
+                customerName = data["name"] as String,
+                customerPhoneNumber = data["number"] as? String ?: "",
+                providerId = data["assignedProviderId"] as? String ?: "",
+                providerName = data["assignedProviderName"] as? String ?: "",
+                providerNumber = data["assignedProviderNumber"] as? String ?: "",
+                description = data["description"] as String,
+                serviceType = data["serviceType"] as String,
+                city = data["city"] as String,
+                address = data["address"] as String,
+                cost = data["cost"] as String,
+                status = data["status"] as String,
+                date = sdfISO.parse(doc.updatedAt)
+            )
+
+        }catch (e: Exception){
+            logError(tag, "Error getting job by id $jobId", e)
+            null
+        }
+    }
+
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {
         return try {
             val queries = mutableListOf(
@@ -82,7 +116,7 @@ class JobRequestService(client: Client) {
         }
     }
 
-    private suspend fun getJobs(baseQueries: List<String>): List<Job> {
+    private suspend fun getJobs(baseQueries: List<String>): List<JobShort> {
         val userId = AppData.authToken ?: run {
             logError(tag, "User profile not available.")
             return emptyList()
@@ -112,23 +146,15 @@ class JobRequestService(client: Client) {
         }
     }
 
-    private fun mapDocumentsToJobs(documents: List<io.appwrite.models.Document<Map<String, Any>>>): List<Job> {
+    private fun mapDocumentsToJobs(documents: List<io.appwrite.models.Document<Map<String, Any>>>): List<JobShort> {
         val sdfISO = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
         return documents.mapNotNull { doc ->
             try {
                 val data = doc.data
-                Job(
+                JobShort(
                     id = doc.id,
-                    customerId = data["customerId"] as String,
-                    customerName = data["name"] as String,
-                    customerPhoneNumber = data["number"] as? String ?: "",
-                    providerId = data["assignedProviderId"] as? String ?: "",
-                    providerName = data["assignedProviderName"] as? String ?: "",
-                    providerNumber = data["assignedProviderNumber"] as? String ?: "",
                     description = data["description"] as String,
                     serviceType = data["serviceType"] as String,
-                    city = data["city"] as String,
-                    address = data["address"] as String,
                     cost = data["cost"] as String,
                     status = data["status"] as String,
                     date = sdfISO.parse(doc.updatedAt)
@@ -140,14 +166,14 @@ class JobRequestService(client: Client) {
         }
     }
 
-    suspend fun getCurrentJobRequests(): List<Job> {
+    suspend fun getCurrentJobRequests(): List<JobShort> {
         return getJobs(listOf(
             Query.equal("status", listOf(AppData.OPEN, AppData.ACCEPTED)),
             Query.orderDesc($$"$updatedAt")
         ))
     }
 
-    suspend fun getPreviousJobsRequestOfToday(): List<Job> {
+    suspend fun getPreviousJobsRequestOfToday(): List<JobShort> {
         val (start, end) = getTodayDateRangeISO()
         return getJobs(
             listOf(
@@ -159,7 +185,7 @@ class JobRequestService(client: Client) {
         )
     }
 
-    suspend fun getPreviousJobsRequestOfThisWeek(): List<Job> {
+    suspend fun getPreviousJobsRequestOfThisWeek(): List<JobShort> {
         val (start, end) = getThisWeekDateRangeISO()
         return getJobs(
             listOf(

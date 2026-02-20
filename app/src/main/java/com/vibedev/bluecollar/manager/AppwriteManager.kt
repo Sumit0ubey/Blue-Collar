@@ -43,4 +43,6 @@ object AppwriteManager {
         realtime = RealtimeService(client)
     }
 
+    fun getClient(): Client = client
+
 }

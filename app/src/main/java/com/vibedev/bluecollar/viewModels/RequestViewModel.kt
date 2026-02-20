@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.data.Job
 import com.vibedev.bluecollar.data.JobRequest
+import com.vibedev.bluecollar.data.JobShort
 import com.vibedev.bluecollar.manager.AppwriteManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,10 @@ class RequestViewModel : ViewModel() {
         return AppwriteManager.functions.createRequestViaFunction(customerName, number, city, address, serviceDescription, serviceType, pay)
     }
 
+    suspend fun getJobById(jobId: String): Job? {
+        return AppwriteManager.request.getJobById(jobId)
+    }
+
     suspend fun getOpenJobs(city: String? = null, serviceType: String? = null): List<JobRequest> {
         return AppwriteManager.request.getOpenJobs(city, serviceType)
     }
@@ -47,32 +52,22 @@ class RequestViewModel : ViewModel() {
     }
 
     suspend fun cancelJobRequest(jobId: String) {
-        _isLoading.value = true
-        try {
-            AppwriteManager.request.updateJobStatus(jobId, AppData.CANCELLED)
-        } finally {
-            _isLoading.value = false
-        }
+        AppwriteManager.request.updateJobStatus(jobId, AppData.CANCELLED)
     }
 
     suspend fun markJobAsComplete(jobId: String) {
-        _isLoading.value = true
-        try {
-            AppwriteManager.request.updateJobStatus(jobId, AppData.COMPLETED)
-        } finally {
-            _isLoading.value = false
-        }
+        AppwriteManager.request.updateJobStatus(jobId, AppData.COMPLETED)
     }
 
-    suspend fun getCurrentRequests(): List<Job> {
+    suspend fun getCurrentRequests(): List<JobShort> {
         return AppwriteManager.request.getCurrentJobRequests()
     }
 
-    suspend fun getPreviousRequestOfToday(): List<Job> {
+    suspend fun getPreviousRequestOfToday(): List<JobShort> {
         return AppwriteManager.request.getPreviousJobsRequestOfToday()
     }
 
-    suspend fun getPreviousRequestOfThisWeek(): List<Job> {
+    suspend fun getPreviousRequestOfThisWeek(): List<JobShort> {
         return AppwriteManager.request.getPreviousJobsRequestOfThisWeek()
     }
 }

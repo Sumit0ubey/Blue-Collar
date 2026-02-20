@@ -46,6 +46,17 @@ fun getDrawableForNotification(service: String): Int {
     }
 }
 
+fun getDrawableForService(service: String): Int {
+    return when(service) {
+        "painter" -> R.drawable.painting
+        "cleaner" -> R.drawable.cleaning
+        "electrician" -> R.drawable.electrical
+        "plumber" -> R.drawable.plumbing
+        "carpenter" -> R.drawable.carpenter
+        else -> R.drawable.service
+    }
+}
+
 
 fun formatTimeAgo(time: String): String {
     val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())

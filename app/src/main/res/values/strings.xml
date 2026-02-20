@@ -16,4 +16,5 @@
     <string name="address_label">Address: %s</string>
     <string name="number_label">Number: %s</string>
     <string name="description_label">Description: %s</string>
+    <string name="provider_details">Provider Details</string>
 </resources>

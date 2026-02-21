@@ -1,6 +1,6 @@
 # Blue Collar <img src="https://raw.githubusercontent.com/Sumit0ubey/Blue-Collar/main/app/src/main/ic_launcher-playstore.png" alt="Logo" width="50"/>
 
-[![Build Status](https://img.shields.io/travis/com/your-username/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/blue-collar)
+[![Build Status](https://img.shields.io/travis/com/Sumit0ubey/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/blue-collar)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Release](https://img.shields.io/github/release/Sumit0ubey/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/Blue-Collar/releases/tag/v1.8)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)

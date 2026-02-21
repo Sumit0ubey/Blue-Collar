@@ -42,6 +42,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.messaging.FirebaseMessaging
 import com.vibedev.bluecollar.data.AppData
+import com.vibedev.bluecollar.manager.AppwriteManager
 import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.services.ProviderOnlineService
 import com.vibedev.bluecollar.services.RealtimeNotificationService
@@ -56,6 +57,7 @@ import com.vibedev.bluecollar.ui.profile.ProfileFragment
 import com.vibedev.bluecollar.ui.service.ServiceFragment
 import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
 import com.vibedev.bluecollar.ui.theme.blue_500
+import com.vibedev.bluecollar.utils.showToast
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -120,6 +122,16 @@ class MainActivity : FragmentActivity() {
     private fun handleNotificationIntent(intent: Intent?) {
         intent ?: return
 
+        if (intent.action == Intent.ACTION_VIEW && intent.data != null) {
+            val viewIntent = Intent(Intent.ACTION_VIEW, intent.data)
+            try {
+                startActivity(viewIntent)
+            } catch (e: android.content.ActivityNotFoundException) {
+                showToast(this, "No application can handle this request.", true)
+            }
+            return
+        }
+
         val screen = intent.getStringExtra("screen")?.trim()?.lowercase() ?: return
         val jobId = intent.getStringExtra("jobId")
 
@@ -166,8 +178,9 @@ class MainActivity : FragmentActivity() {
             FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                 if (!token.isNullOrBlank() && !AppData.authToken.isNullOrBlank()) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        RealtimeNotificationService(applicationContext)
-                            .registerOrUpdatePushTarget(token)
+                        val service = RealtimeNotificationService(applicationContext)
+                        service.registerOrUpdatePushTarget(token)
+                        AppwriteManager.functions.syncSubscriptions(service.stableTargetId())
                     }
                 }
             }

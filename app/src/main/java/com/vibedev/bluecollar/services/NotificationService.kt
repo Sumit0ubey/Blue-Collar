@@ -11,7 +11,7 @@ import io.appwrite.services.Databases
 class NotificationService(client: Client) {
 
     private val databases = Databases(client)
-    private val TAG = "NotificationService"
+    private val tag = "NotificationService"
 
     suspend fun getNotifications(): List<Notification>? {
         val userId = AppData.authToken
@@ -23,7 +23,7 @@ class NotificationService(client: Client) {
             val response = databases.listDocuments(
                 AppData.DATABASE_ID,
                 AppData.NOTIFICATION_COLLECTION_ID,
-                listOf(Query.equal("customerID", userId), Query.orderDesc($$"$updatedAt"))
+                listOf(Query.equal("customerID", userId), Query.equal("isShow", true), Query.orderDesc($$"$createdAt"))
             )
 
             response.documents.map { doc ->
@@ -32,14 +32,44 @@ class NotificationService(client: Client) {
                     id = doc.id,
                     title = data["title"] as String,
                     message = data["description"] as String,
-                    time = formatTimeAgo(data[$$"$updatedAt"] as String),
+                    time = formatTimeAgo(data[$$"$createdAt"] as String),
                     iconRes = data["iconResource"] as String,
                     isRead = data["isRead"] as Boolean,
                 )
             }
         } catch (e: Exception) {
-            logError(TAG, "Error getting notification of user $userId", e)
+            logError(tag, "Error getting notification of user $userId", e)
             null
+        }
+    }
+
+    suspend fun updateNotificationToNotShow(notificationId: String, isShow: Boolean = true) {
+        try {
+            databases.updateDocument(
+                databaseId = AppData.DATABASE_ID,
+                collectionId = AppData.NOTIFICATION_COLLECTION_ID,
+                documentId = notificationId,
+                data = mapOf(
+                    "isShow" to isShow,
+                )
+            )
+        }catch (e: Exception){
+            logError(tag, "Error updating notification $notificationId", e)
+        }
+    }
+
+    suspend fun updateNotificationToRed(notificationId: String, isRead: Boolean = false) {
+        try {
+            databases.updateDocument(
+                databaseId = AppData.DATABASE_ID,
+                collectionId = AppData.NOTIFICATION_COLLECTION_ID,
+                documentId = notificationId,
+                data = mapOf(
+                    "isRead" to isRead,
+                )
+            )
+        }catch (e: Exception){
+            logError(tag, "Error updating notification $notificationId", e)
         }
     }
 }

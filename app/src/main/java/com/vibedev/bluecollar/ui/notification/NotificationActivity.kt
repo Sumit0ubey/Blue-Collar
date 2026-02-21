@@ -31,12 +31,11 @@ class NotificationsActivity : AppCompatActivity() {
 
         adapter = NotificationAdapter(
             mutableListOf(),
-            onItemClick = { /* to open/detail */ },
+            onItemClick = { 
+                notificationViewModel.updateNotificationToRed(it.id)
+            },
             onItemDelete = {
-                if (adapter.itemCount == 0) {
-                    binding.textNoNotifications.visibility = View.VISIBLE
-                    binding.recyclerNotifications.visibility = View.GONE
-                }
+                notificationViewModel.updateNotificationToNotShow(it.id)
             }
         )
         binding.recyclerNotifications.adapter = adapter

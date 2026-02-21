@@ -112,6 +112,7 @@ class JobDetailsActivity : AppCompatActivity() {
 
         binding.collapsingToolbar.title = "Professional ${job?.serviceType?.capitalizeFirst()} Needed"
         binding.serviceTypeDetails.text = job?.serviceType?.capitalizeFirst()
+        binding.jobStatusDetails.text = job?.status?.uppercase()
         binding.jobDescriptionDetails.text = job?.description?.capitalizeFirst()
         binding.jobDateDetails.text = formattedDate
         binding.jobCostDetails.text = formattedCost

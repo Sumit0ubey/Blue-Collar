@@ -24,6 +24,11 @@ import com.vibedev.bluecollar.services.CloudinaryService
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
 import com.vibedev.bluecollar.adapter.PortfolioUploadAdapter
 import com.vibedev.bluecollar.databinding.ActivityEditProfileBinding
+import com.vibedev.bluecollar.manager.AppwriteManager
+import com.vibedev.bluecollar.services.RealtimeNotificationService
+import com.vibedev.bluecollar.utils.logError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -266,6 +271,16 @@ class EditProfileActivity : AppCompatActivity() {
                         )
                         AppData.userProfile = newUserProfile
                     }
+
+                    val targetId = RealtimeNotificationService(applicationContext).stableTargetId()
+                    runCatching {
+                        withContext(Dispatchers.IO) {
+                            AppwriteManager.functions.syncSubscriptions(targetId)
+                        }
+                    }.onFailure {
+                        logError("Profile", "syncSubscriptions failed", it as Exception?)
+                    }
+
                     hideLoading()
                     showToast(this@EditProfileActivity, "Profile saved successfully")
                     finish()

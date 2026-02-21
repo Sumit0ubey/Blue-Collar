@@ -133,4 +133,30 @@ class FunctionsService(client: Client) {
             false
         }
     }
+
+    suspend fun syncSubscriptions(targetId: String) : Boolean{
+        return try {
+            val body = JSONObject()
+                .put("targetId", targetId)
+                .toString()
+
+            val execution = functions.createExecution(
+                functionId = AppData.SYNC_SUBSCRIPTION_FUNCTION_ID,
+                body = body,
+                async = true
+            )
+
+            val responseJson = JSONObject(execution.responseBody)
+            if (responseJson.optBoolean("ok")) {
+                logInfo(tag, "Synced Subscriptions Successfully")
+                true
+            } else {
+                logError(tag, "Failed to sync Subscriptions. Response: ${execution.responseBody}")
+                false
+            }
+        } catch (e: kotlin.Exception){
+            logError(tag, "Error calling sync Subscriptions", e)
+            false
+        }
+    }
 }

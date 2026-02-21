@@ -49,7 +49,7 @@ class RealtimeNotificationService(private val context: Context) {
 
     }
 
-    private fun stableTargetId(): String {
+     fun stableTargetId(): String {
         val androidId = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ANDROID_ID

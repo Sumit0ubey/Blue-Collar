@@ -152,4 +152,22 @@ class ServicesService(client: Client) {
             emptyList()
         }
     }
+
+    suspend fun getServiceCity(): List<String> {
+        return try {
+            val response = databases.listDocuments(
+                DATABASE_ID,
+                AppData.CITY_COLLECTION_ID,
+                listOf(Query.equal("isActive", true))
+            )
+
+            response.documents.map { doc ->
+                doc.data["name"] as String
+            }.sorted()
+
+        } catch (e: Exception){
+            logError(TAG, "Error getting city ", e)
+            emptyList()
+        }
+    }
 }

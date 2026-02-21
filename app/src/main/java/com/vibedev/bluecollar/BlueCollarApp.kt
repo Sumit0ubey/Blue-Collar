@@ -24,6 +24,7 @@ class BlueCollarApp : Application() {
         ProcessLifecycleOwner.get().lifecycleScope.launch(Dispatchers.IO) {
             AppData.serviceTypes = serviceViewModel.getServiceTypeNames()
             AppData.services = serviceViewModel.getService()
+            AppData.SERVICE_LOCATIONS = serviceViewModel.getServiceCity()
         }
     }
 }

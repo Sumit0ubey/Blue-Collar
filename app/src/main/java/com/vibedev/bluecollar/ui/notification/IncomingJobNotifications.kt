@@ -28,7 +28,7 @@ object IncomingJobNotifications {
         return NotificationCompat.Builder(context, ONGOING_SERVICE_CHANNEL_ID)
             .setSmallIcon(R.drawable.app_logo)
             .setContentTitle("You are currently online")
-            .setContentText("You will be notified of new job requests.")
+            .setContentText("You will be notified of new requests.")
             .setOngoing(true)
             .build()
     }

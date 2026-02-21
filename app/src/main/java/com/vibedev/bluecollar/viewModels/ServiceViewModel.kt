@@ -32,4 +32,8 @@ class ServiceViewModel : ViewModel() {
         return AppwriteManager.services.getServicesByCity(city)
     }
 
+    suspend fun getServiceCity(): List<String> {
+        return AppwriteManager.services.getServiceCity()
+    }
+
 }

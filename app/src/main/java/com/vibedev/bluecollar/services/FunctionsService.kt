@@ -107,4 +107,30 @@ class FunctionsService(client: Client) {
             false
         }
     }
+
+    suspend fun pruneOtherTokenForFCM(keepTargetId: String) : Boolean{
+        return try{
+            val body = JSONObject()
+                .put("keepTargetId", keepTargetId)
+                .toString()
+
+            val execution = functions.createExecution(
+                functionId = AppData.PRUNE_FUNCTION_ID,
+                body = body,
+                async = true
+            )
+
+            val responseJson = JSONObject(execution.responseBody)
+            if (responseJson.optBoolean("ok")) {
+                logInfo(tag, "Pruned other token for FCM Successfully")
+                true
+            } else {
+                logError(tag, "Failed to prune other token for FCM. Response: ${execution.responseBody}")
+                false
+            }
+        } catch (e: kotlin.Exception){
+            logError(tag, "Error calling prune other token for FCM", e)
+            false
+        }
+    }
 }

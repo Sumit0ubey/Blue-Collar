@@ -40,13 +40,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.messaging.FirebaseMessaging
 import com.vibedev.bluecollar.data.AppData
 import com.vibedev.bluecollar.manager.SessionManager
 import com.vibedev.bluecollar.services.ProviderOnlineService
+import com.vibedev.bluecollar.services.RealtimeNotificationService
 import com.vibedev.bluecollar.ui.JobActivity
 import com.vibedev.bluecollar.ui.auth.AdditionalInfoActivity
 import com.vibedev.bluecollar.ui.auth.LoginActivity
 import com.vibedev.bluecollar.ui.home.HomeFragment
+import com.vibedev.bluecollar.ui.myjobs.JobDetailsActivity
 import com.vibedev.bluecollar.ui.myjobs.JobsFragment
 import com.vibedev.bluecollar.ui.notification.NotificationsActivity
 import com.vibedev.bluecollar.ui.profile.ProfileFragment
@@ -55,6 +58,8 @@ import com.vibedev.bluecollar.ui.theme.BlueCollarTheme
 import com.vibedev.bluecollar.ui.theme.blue_500
 import com.vibedev.bluecollar.viewModels.AuthViewModel
 import com.vibedev.bluecollar.viewModels.ProfileViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
@@ -71,6 +76,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleNotificationIntent(intent)
 
         enableEdgeToEdge()
 
@@ -98,11 +104,43 @@ class MainActivity : FragmentActivity() {
         noInternetDialog?.dismiss()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
     private fun checkNetworkAndLoad() {
         if (isNetworkAvailable()) {
             loadContent()
         } else {
             showNoInternetDialog()
+        }
+    }
+
+    private fun handleNotificationIntent(intent: Intent?) {
+        intent ?: return
+
+        val screen = intent.getStringExtra("screen")?.trim()?.lowercase() ?: return
+        val jobId = intent.getStringExtra("jobId")
+
+        navigateToScreen(screen, jobId)
+    }
+
+    private fun navigateToScreen(screen: String, jobId: String?) {
+        when (screen) {
+            "job" -> {
+                val intent = Intent(this, JobDetailsActivity::class.java)
+                intent.putExtra("jobId", jobId)
+                startActivity(intent)
+            }
+
+            "notifications" -> {
+                startActivity(Intent(this, NotificationsActivity::class.java))
+            }
+
+            else -> {
+                return
+            }
         }
     }
 
@@ -125,6 +163,15 @@ class MainActivity : FragmentActivity() {
             sessionManager.saveAuthToken(user.id)
             AppData.authToken = user.id
 
+            FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                if (!token.isNullOrBlank() && !AppData.authToken.isNullOrBlank()) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        RealtimeNotificationService(applicationContext)
+                            .registerOrUpdatePushTarget(token)
+                    }
+                }
+            }
+
             if (profileViewModel.doesProfileExist(user.id)) {
                 val userProfile = profileViewModel.getProfile(user.id)
                 sessionManager.setProfileCompleted(true)
@@ -137,6 +184,7 @@ class MainActivity : FragmentActivity() {
 
                 isLoadingState = false
                 showMainState = true
+                checkAndRequestNotificationPermission()
             } else {
                 sessionManager.setProfileCompleted(false)
                 startActivity(Intent(this@MainActivity, AdditionalInfoActivity::class.java))
@@ -189,6 +237,27 @@ class MainActivity : FragmentActivity() {
             }
         }
         action()
+    }
+
+    private fun checkAndRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!hasPermission) {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Permission Required")
+                    .setMessage("To ensure you receive timely updates, please grant notification permissions.")
+                    .setPositiveButton("Grant") { _, _ ->
+                        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+                    }
+                    .setNegativeButton("Later", null)
+                    .setCancelable(false)
+                    .show()
+            }
+        }
     }
 
     private fun checkSystemAlertWindowPermission() {
@@ -417,6 +486,7 @@ fun FragmentContainer(
         }
     )
 }
+
 
 enum class AppDestinations(
     val label: String,

@@ -8,6 +8,7 @@ import com.vibedev.bluecollar.utils.logDebug
 import com.vibedev.bluecollar.utils.logError
 import io.appwrite.exceptions.AppwriteException
 import io.appwrite.services.Account
+import java.security.MessageDigest
 
 class RealtimeNotificationService(private val context: Context) {
 
@@ -15,44 +16,54 @@ class RealtimeNotificationService(private val context: Context) {
     private val account = Account(client)
 
     suspend fun registerOrUpdatePushTarget(fcmToken: String) {
+        if (fcmToken.isBlank()) return
 
-        val targetId = stableTargetId()
+        val myTargetId = stableTargetId()
 
         try {
             account.createPushTarget(
-                targetId = targetId,
+                targetId = myTargetId,
                 identifier = fcmToken,
                 providerId = AppData.MESSAGING_PROVIDER_ID
             )
-
-            logDebug("PushTarget", "Created push target")
-
+            logDebug("PushTarget", "Created push target: $myTargetId")
         } catch (e: AppwriteException) {
-
             if (e.code == 409) {
                 try {
                     account.updatePushTarget(
-                        targetId = targetId,
+                        targetId = myTargetId,
                         identifier = fcmToken
                     )
-
-                    logDebug("PushTarget", "Updated push target")
-
+                    logDebug("PushTarget", "Updated push target: $myTargetId")
                 } catch (ex: Exception) {
                     logError("PushTarget", "Update failed", ex)
+                    return
                 }
             } else {
                 logError("PushTarget", "Create failed", e)
+                return
             }
         }
-    }
 
+        AppwriteManager.functions.pruneOtherTokenForFCM(myTargetId)
+
+    }
 
     private fun stableTargetId(): String {
         val androidId = Settings.Secure.getString(
             context.contentResolver,
             Settings.Secure.ANDROID_ID
-        )
-        return "android_$androidId"
+        ) ?: "unknown"
+
+        val userId = AppData.authToken ?: "anon"
+
+        val digest = sha256("$userId|$androidId").take(20)
+        return "and_$digest"
+    }
+
+    private fun sha256(input: String): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        val bytes = md.digest(input.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

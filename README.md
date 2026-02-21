@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/com/your-username/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/blue-collar)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Release](https://img.shields.io/github/release/your-username/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/Blue-Collar/releases/tag/v1.8)
+[![Release](https://img.shields.io/github/release/Sumit0ubey/blue-collar.svg?style=for-the-badge)](https://github.com/Sumit0ubey/Blue-Collar/releases/tag/v1.8)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
 
 **Blue Collar** is your on-demand platform for connecting with skilled blue-collar professionals right in your neighborhood. Built with a cutting-edge, native Android stack featuring Kotlin and Jetpack Compose, Blue Collar bridges the gap between those who need services and the professionals who can provide them. Whether you're a homeowner looking for a plumber or an electrician looking for your next gig, Blue Collar makes it simple, fast, and reliable.

@@ -123,4 +123,130 @@ class JobHistoryService(client: Client) {
         val queries = listOf(Query.greaterThanEqual($$"$updatedAt", startOfYear))
         return getHistory(limit, reverseOrder, queries)
     }
+
+    private suspend fun getRequestPostedNumberAsCustomer(timeQueries: List<String>): Int {
+        return try {
+            val result = databases.listDocuments(
+                databaseId = AppData.DATABASE_ID,
+                collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
+                queries = listOf(
+                    Query.equal("customerId", AppData.authToken ?: ""),
+                ) + timeQueries
+            )
+            result.total.toInt()
+        } catch (e: Exception) {
+            logError(TAG, "Error getting request posted number", e)
+            0
+        }
+    }
+
+    suspend fun getRequestPostedTodayNumberAsCustomer(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfToday = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfToday))
+        return getRequestPostedNumberAsCustomer(queries)
+    }
+
+    suspend fun getRequestPostedThisWeekNumberAsCustomer(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfWeek = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfWeek))
+        return getRequestPostedNumberAsCustomer(queries)
+    }
+
+    suspend fun getRequestPostedThisMonthNumberAsCustomer(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfMonth = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfMonth))
+        return getRequestPostedNumberAsCustomer(queries)
+    }
+
+    suspend fun getRequestPostedThisYearNumberAsCustomer(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_YEAR, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfYear = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfYear))
+        return getRequestPostedNumberAsCustomer(queries)
+    }
+
+    private suspend fun getJobAcceptedNumberAsProvider(timeQueries: List<String>): Int {
+        return try {
+            val result = databases.listDocuments(
+                databaseId = AppData.DATABASE_ID,
+                collectionId = AppData.JOB_REQUEST_COLLECTION_ID,
+                queries = listOf(
+                    Query.equal("assignedProviderId", AppData.authToken ?: ""),
+                ) + timeQueries
+            )
+            result.total.toInt()
+        } catch (e: Exception) {
+            logError(TAG, "Error getting job accepted number", e)
+            0
+        }
+    }
+
+    suspend fun getJobAcceptedTodayNumberAsProvider(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfToday = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfToday))
+        return getJobAcceptedNumberAsProvider(queries)
+    }
+
+    suspend fun getJobAcceptedThisWeekNumberAsProvider(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfWeek = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfWeek))
+        return getJobAcceptedNumberAsProvider(queries)
+    }
+
+    suspend fun getJobAcceptedThisMonthNumberAsProvider(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfMonth = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfMonth))
+        return getJobAcceptedNumberAsProvider(queries)
+    }
+
+    suspend fun getJobAcceptedThisYearNumberAsProvider(): Int {
+        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.set(Calendar.DAY_OF_YEAR, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfYear = dateFormat.format(calendar.time)
+        val queries = listOf(Query.greaterThanEqual($$"$createdAt", startOfYear))
+        return getJobAcceptedNumberAsProvider(queries)
+    }
 }

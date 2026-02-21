@@ -5,15 +5,23 @@
 [![Release](https://img.shields.io/github/release/your-username/blue-collar.svg?style=for-the-badge)](https://github.com/your-username/blue-collar/releases)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
 
-**Blue Collar** is a modern Android application built with Kotlin and Jetpack Compose that connects blue-collar workers with job opportunities. It provides a seamless experience for finding jobs, managing work history, and building a professional profile.
+**Blue Collar** is your on-demand platform for connecting with skilled blue-collar professionals right in your neighborhood. Built with a cutting-edge, native Android stack featuring Kotlin and Jetpack Compose, Blue Collar bridges the gap between those who need services and the professionals who can provide them. Whether you're a homeowner looking for a plumber or an electrician looking for your next gig, Blue Collar makes it simple, fast, and reliable.
 
-## ✨ Features
+## ✨ Core Features
 
-*   🔐 **Secure User Authentication:** Simple and secure sign-up and login.
-*   🔍 **Advanced Job Search:** Easily browse, search, and filter job listings.
-*   📄 **Comprehensive Job History:** Keep a detailed record of past and present employment.
-*   👨‍💼 **Profile Management:** Create a professional profile to highlight your skills and experience.
-*   📸 **Image Uploads:** Upload a professional profile picture.
+Blue Collar is designed with two key users in mind: the **Customer** who needs a job done, and the **Service Provider** who gets it done.
+
+### 👤 For Customers
+
+*   **Post Jobs in a Snap:** Describe the job you need, set your location and budget, and post it for local professionals to see.
+*   **Stay in the Loop:** Get real-time updates on your job's progress, from the moment it's accepted to when it's marked as complete.
+*   **Keep Track of Your Projects:** Easily access a complete history of all your past job requests for your records.
+
+### 👷 For Service Providers
+
+*   **Find Work That Fits You:** Discover local job opportunities that match your skills. Filter by service type and city to find the perfect gig.
+*   **Manage Your Workflow:** Keep a clear overview of your active and completed jobs, helping you stay organized and efficient.
+*   **Build Your Reputation:** Create a professional profile to highlight your expertise, location, and skills to attract potential customers.
 
 <!-- ## 📱 Screenshots
 
@@ -31,7 +39,6 @@ This project follows the official Android guide to app architecture and uses the
 *   **DI:** [Hilt](https://dagger.dev/hilt/) for dependency injection.
 *   **Backend:** [Appwrite](https://appwrite.io/) for authentication and database.
 *   **Image Loading:** [Glide](https://github.com/bumptech/glide) for efficient image loading.
-*   **Image Management:** [Cloudinary](https://cloudinary.com/) for cloud-based image storage and manipulation.
 *   **Design:** [Material Design 3](https://m3.material.io/) for a consistent and beautiful design.
 
 ## 🚀 How to Build
@@ -56,7 +63,7 @@ Don't forget to give the project a star! Thanks again!
 
 1.  Fork the Project
 2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+3.  Commit your Changes (`git commit -m '''Add some AmazingFeature'''`)
 4.  Push to the Branch (`git push origin feature/AmazingFeature`)
 5.  Open a Pull Request
 

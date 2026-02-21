@@ -47,16 +47,29 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.welcomeText.text = "Welcome, ${AppData.userProfile?.name?.capitalizeEachWord()}"
+        binding.earnCard.visibility = if (AppData.userProfile?.isServiceProvider == true) View.VISIBLE else View.GONE
+        viewLifecycleOwner.lifecycleScope.launch {
+            updateJobCounts(0)
+        }
 
         binding.timeFilterChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             val selectedChipId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
             val selectedChip = group.findViewById<Chip>(selectedChipId)
 
-            when (selectedChip.text.toString()) {
-                "Today" -> showToast(requireContext(), "Showing Today")
-                "This Week" -> showToast(requireContext(), "Showing This Week")
-                "This Month" -> showToast(requireContext(), "Showing This Month")
-                "This Year" -> showToast(requireContext(), "Showing This Year")
+            viewLifecycleOwner.lifecycleScope.launch {
+                showLoading(true)
+                try {
+                    val order = when (selectedChip.text.toString()) {
+                        "Today" -> 0
+                        "This Week" -> 1
+                        "This Month" -> 2
+                        "This Year" -> 3
+                        else -> 0
+                    }
+                    updateJobCounts(order)
+                } finally {
+                    showLoading(false)
+                }
             }
         }
 
@@ -68,6 +81,19 @@ class HomeFragment : Fragment() {
         }
 
         setupRequestHistoryRecyclerView()
+    }
+
+    private suspend fun updateJobCounts(order: Int) {
+        val isProvider = AppData.userProfile?.isServiceProvider == true
+        if (isProvider) {
+            val createdJobCount = getJobCount(order, false)
+            val requestedJobCount = getJobCount(order, true)
+            binding.totalSpendValue.text = createdJobCount.toString()
+            binding.totalEarnValue.text = requestedJobCount.toString()
+        } else {
+            val createdJobCount = getJobCount(order, false)
+            binding.totalSpendValue.text = createdJobCount.toString()
+        }
     }
 
     private fun showNewRequestDialog() {
@@ -118,14 +144,14 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 requestHistory = requestHistoryViewModel.getRequestHistory(limit = 5)
-                
+
                 if (requestHistory.isEmpty()) {
                     binding.historyRecyclerView.visibility = View.GONE
                     binding.noHistoryText.visibility = View.VISIBLE
                 } else {
                     binding.historyRecyclerView.visibility = View.VISIBLE
                     binding.noHistoryText.visibility = View.GONE
-                    
+
                     val historyAdapter = RequestHistoryAdapter(requestHistory)
                     binding.historyRecyclerView.layoutManager = LinearLayoutManager(requireContext())
                     binding.historyRecyclerView.adapter = historyAdapter
@@ -166,6 +192,10 @@ class HomeFragment : Fragment() {
         val contentViews = listOf(
             binding.welcomeText,
             binding.chipScrollView,
+            binding.chipToday,
+            binding.chipWeek,
+            binding.chipMonth,
+            binding.chipYear,
             binding.spendCard,
             binding.requestsHeader,
             binding.newRequestButton,
@@ -173,27 +203,27 @@ class HomeFragment : Fragment() {
             binding.viewAllButton
         )
         binding.loadingProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        contentViews.forEach { it.visibility = if (isLoading) View.GONE else View.VISIBLE }
-        if (isLoading) {
-            binding.earnCard.visibility = View.GONE
-        } else {
-            binding.earnCard.visibility = if (AppData.userProfile?.isServiceProvider == true) View.VISIBLE else View.GONE
-        }
+        contentViews.forEach { it.isClickable = !isLoading }
     }
 
-    private fun ensureNotificationPermissionThen(action: () -> Unit) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            val granted = androidx.core.content.ContextCompat.checkSelfPermission(
-                requireContext(),
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-
-            if (!granted) {
-                requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1001)
-                return
+    private suspend fun getJobCount(order: Int, isProvider: Boolean) : Int {
+        return when (order) {
+            0 -> {
+                requestHistoryViewModel.getJobCountForToday(isProvider)
+            }
+            1 -> {
+                requestHistoryViewModel.getJobCountForThisWeek(isProvider)
+            }
+            2 -> {
+                requestHistoryViewModel.getJobCountForThisMonth(isProvider)
+            }
+            3 -> {
+                requestHistoryViewModel.getJobCountForThisYear(isProvider)
+            }
+            else -> {
+                0
             }
         }
-        action()
     }
 
     override fun onDestroyView() {

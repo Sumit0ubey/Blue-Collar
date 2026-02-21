@@ -26,4 +26,36 @@ class RequestHistoryViewModel : ViewModel() {
         return AppwriteManager.requestHistory.getJobHistory(limit, reverseOrder)
     }
 
+    suspend fun getJobCountForToday(isProvider: Boolean = false) : Int {
+        return if (isProvider){
+            AppwriteManager.requestHistory.getJobAcceptedTodayNumberAsProvider()
+        } else {
+            AppwriteManager.requestHistory.getRequestPostedTodayNumberAsCustomer()
+        }
+    }
+
+    suspend fun getJobCountForThisWeek(isProvider: Boolean = false) : Int {
+        return if (isProvider) {
+            AppwriteManager.requestHistory.getJobAcceptedThisWeekNumberAsProvider()
+        } else {
+            AppwriteManager.requestHistory.getRequestPostedThisWeekNumberAsCustomer()
+        }
+    }
+
+    suspend fun getJobCountForThisMonth(isProvider: Boolean = false) : Int {
+        return if (isProvider) {
+            AppwriteManager.requestHistory.getJobAcceptedThisMonthNumberAsProvider()
+        } else {
+            AppwriteManager.requestHistory.getRequestPostedThisMonthNumberAsCustomer()
+        }
+    }
+
+    suspend fun getJobCountForThisYear(isProvider: Boolean = false) : Int {
+        return if (isProvider) {
+            AppwriteManager.requestHistory.getJobAcceptedThisYearNumberAsProvider()
+        } else {
+            AppwriteManager.requestHistory.getRequestPostedThisYearNumberAsCustomer()
+        }
+    }
+
 }
